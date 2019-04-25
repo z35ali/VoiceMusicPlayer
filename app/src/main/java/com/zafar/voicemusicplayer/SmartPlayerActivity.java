@@ -22,6 +22,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -111,10 +112,16 @@ public class SmartPlayerActivity extends AppCompatActivity {
                         keeper = matchesFound.get(0);
 
                         if (keeper.equals("pause") || keeper.equals("pause the song") || keeper.equals("pause song")){
-                            playPause();
+                            pause();
                             Toast.makeText(SmartPlayerActivity.this, "Command: "+ keeper, Toast.LENGTH_LONG).show();
                         }else if (keeper.equals("play") || keeper.equals("play the song") || keeper.equals("play song")){
-                            playPause();
+                            play();
+                            Toast.makeText(SmartPlayerActivity.this, "Command: "+ keeper, Toast.LENGTH_LONG).show();
+                        }else if (keeper.equals("next") || keeper.equals("next song") || keeper.equals("play the next song")){
+                            next();
+                            Toast.makeText(SmartPlayerActivity.this, "Command: "+ keeper, Toast.LENGTH_LONG).show();
+                        }else if (keeper.equals("previous") || keeper.equals("previous song") || keeper.equals("play the previous song")){
+                            previous();
                             Toast.makeText(SmartPlayerActivity.this, "Command: "+ keeper, Toast.LENGTH_LONG).show();
                         }
 
@@ -178,6 +185,24 @@ public class SmartPlayerActivity extends AppCompatActivity {
                 playPause();
             }
         });
+
+        previousBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mediaPlayer.getCurrentPosition() > 0) {
+                    previous();
+                }
+            }
+        });
+
+        nextBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mediaPlayer.getCurrentPosition() > 0) {
+                    next();
+                }
+            }
+        });
     }
 
     private void validateReceiveStart(){
@@ -218,6 +243,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
     }
 
     private void playPause(){
+
         if (mediaPlayer.isPlaying()){
             imageView.setBackgroundResource(R.drawable.five);
             pausePlayBtn.setImageResource(R.drawable.play);
@@ -229,6 +255,64 @@ public class SmartPlayerActivity extends AppCompatActivity {
             imageView.setBackgroundResource(R.drawable.four);
 
         }
+    }
+
+    private void play(){
+        if (!mediaPlayer.isPlaying()){
+            pausePlayBtn.setImageResource(R.drawable.pause);
+            mediaPlayer.start();
+            imageView.setBackgroundResource(R.drawable.four);
+
+        }
+    }
+
+    private void pause(){
+        if(mediaPlayer.isPlaying()){
+            imageView.setBackgroundResource(R.drawable.five);
+            pausePlayBtn.setImageResource(R.drawable.play);
+            mediaPlayer.pause();
+        }
+    }
+
+    private void next(){
+        mediaPlayer.pause();
+        mediaPlayer.stop();
+        mediaPlayer.release();
+
+        position = (position+1)%songs.size();
+
+        Uri uri = Uri.parse(songs.get(position).toString());
+
+        mediaPlayer = mediaPlayer.create(SmartPlayerActivity.this, uri);
+
+        File file = new File(songs.get(position).toString());
+        songName= file.getName();
+        songNameText.setText(songName);
+
+        mediaPlayer.start();
+        imageView.setBackgroundResource(R.drawable.four);
+
+    }
+
+    private void previous(){
+        mediaPlayer.pause();
+        mediaPlayer.stop();
+        mediaPlayer.release();
+
+        position = (position-1)<0 ? (songs.size()-1) : (position-1);
+        Uri uri = Uri.parse(songs.get(position).toString());
+
+        mediaPlayer = mediaPlayer.create(SmartPlayerActivity.this, uri);
+
+        File file = new File(songs.get(position).toString());
+        songName= file.getName();
+        songNameText.setText(songName);
+
+        mediaPlayer.start();
+        imageView.setBackgroundResource(R.drawable.four);
+
+
+
     }
 
 
