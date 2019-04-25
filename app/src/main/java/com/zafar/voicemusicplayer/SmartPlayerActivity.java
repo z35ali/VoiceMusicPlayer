@@ -217,14 +217,14 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
     private void playPause(){
         if (mediaPlayer.isPlaying()){
-            imageView.setBackgroundResource(R.drawable.four);
+            imageView.setBackgroundResource(R.drawable.five);
             pausePlayBtn.setImageResource(R.drawable.play);
             mediaPlayer.pause();
 
         }else{
             pausePlayBtn.setImageResource(R.drawable.pause);
             mediaPlayer.start();
-            imageView.setBackgroundResource(R.drawable.five);
+            imageView.setBackgroundResource(R.drawable.four);
 
         }
     }
