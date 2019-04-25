@@ -27,6 +27,7 @@
        android:textAllCaps="false"
        android:textColor="@color/colorPrimaryDark"
        android:layout_marginTop="7dp"
+       android:textAlignment="center"
        android:marqueeRepeatLimit="marquee_forever"
        android:ellipsize="marquee"/>
 
