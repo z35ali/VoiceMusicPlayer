@@ -139,16 +139,18 @@ public class SmartPlayerActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
-                switch(event.getAction()){
-                    case MotionEvent.ACTION_DOWN:
-                        speechRecognizer.startListening(speechRecognizerIntent);
-                        keeper = "";
-                    break;
+                if(voiceMode) {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            speechRecognizer.startListening(speechRecognizerIntent);
+                            keeper = "";
+                            break;
 
-                    case MotionEvent.ACTION_UP:
-                        speechRecognizer.stopListening();
-                        break;
+                        case MotionEvent.ACTION_UP:
+                            speechRecognizer.stopListening();
+                            break;
 
+                    }
                 }
                 return false;
             }
