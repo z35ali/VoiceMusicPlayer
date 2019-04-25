@@ -123,6 +123,9 @@ public class SmartPlayerActivity extends AppCompatActivity {
                         }else if (keeper.equals("previous") || keeper.equals("previous song") || keeper.equals("play the previous song")){
                             previous();
                             Toast.makeText(SmartPlayerActivity.this, "Command: "+ keeper, Toast.LENGTH_LONG).show();
+                        }else if (keeper.equals("voice off") || keeper.equals("no voice") || keeper.equals("turn off voice") || keeper.equals("turn voice off")){
+                            voiceToggle();
+                            Toast.makeText(SmartPlayerActivity.this, "Command: "+ keeper, Toast.LENGTH_LONG).show();
                         }
 
                         Toast.makeText(SmartPlayerActivity.this, "Result = " + keeper, Toast.LENGTH_LONG).show();
@@ -166,16 +169,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
         voiceEnableBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (voiceMode){
-                    voiceEnableBtn.setText("Voice Enabled - OFF");
-                    voiceMode = false;
-                    lowerLayout.setVisibility(View.VISIBLE);
-                }else{
-                    voiceEnableBtn.setText("Voice Enabled - ON");
-                    lowerLayout.setVisibility(View.GONE);
-                    voiceMode = true;
-
-                }
+             voiceToggle();
             }
         });
 
@@ -201,6 +195,13 @@ public class SmartPlayerActivity extends AppCompatActivity {
                 if (mediaPlayer.getCurrentPosition() > 0) {
                     next();
                 }
+            }
+        });
+
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                next();
             }
         });
     }
@@ -294,25 +295,36 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
     }
 
-    private void previous(){
+    private void previous() {
         mediaPlayer.pause();
         mediaPlayer.stop();
         mediaPlayer.release();
 
-        position = (position-1)<0 ? (songs.size()-1) : (position-1);
+        position = (position - 1) < 0 ? (songs.size() - 1) : (position - 1);
         Uri uri = Uri.parse(songs.get(position).toString());
 
         mediaPlayer = mediaPlayer.create(SmartPlayerActivity.this, uri);
 
         File file = new File(songs.get(position).toString());
-        songName= file.getName();
+        songName = file.getName();
         songNameText.setText(songName);
 
         mediaPlayer.start();
         imageView.setBackgroundResource(R.drawable.four);
 
+    }
 
+    private void voiceToggle(){
+        if (voiceMode){
+            voiceEnableBtn.setText("Voice Enabled - OFF");
+            voiceMode = false;
+            lowerLayout.setVisibility(View.VISIBLE);
+        }else{
+            voiceEnableBtn.setText("Voice Enabled - ON");
+            lowerLayout.setVisibility(View.GONE);
+            voiceMode = true;
 
+        }
     }
 
 
