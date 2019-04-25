@@ -9,13 +9,14 @@
     tools:context=".SmartPlayerActivity">
 
     <RelativeLayout
+        android:id="@+id/upper"
         android:layout_width="match_parent"
         android:layout_height="330dp">
 
         <ImageView
             android:id="@+id/logo"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="270dp" />
    <TextView
        android:id="@+id/songName"
        android:layout_width="match_parent"
@@ -25,7 +26,7 @@
        android:textStyle="italic|bold"
        android:textAllCaps="false"
        android:textColor="@color/colorPrimaryDark"
-       android:layout_marginTop="16dp"
+       android:layout_marginTop="7dp"
        android:marqueeRepeatLimit="marquee_forever"
        android:ellipsize="marquee"/>
 

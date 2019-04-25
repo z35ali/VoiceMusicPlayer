@@ -3,8 +3,10 @@ package com.zafar.voicemusicplayer;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
@@ -20,6 +22,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -36,6 +39,11 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private RelativeLayout lowerLayout;
     private Button voiceEnableBtn;
     private boolean voiceMode = true;
+
+    private MediaPlayer mediaPlayer;
+    private int position;
+    private ArrayList<File> songs;
+    private String songName;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +65,8 @@ public class SmartPlayerActivity extends AppCompatActivity {
         speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
 
+        validateReceiveStart();
+        imageView.setBackgroundResource(R.drawable.logo);
         speechRecognizer.setRecognitionListener(new RecognitionListener() {
             @Override
             public void onReadyForSpeech(Bundle params) {
@@ -135,14 +145,40 @@ public class SmartPlayerActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (voiceMode){
                     voiceEnableBtn.setText("Voice Enabled - OFF");
+                    voiceMode = false;
                     lowerLayout.setVisibility(View.VISIBLE);
                 }else{
                     voiceEnableBtn.setText("Voice Enabled - ON");
                     lowerLayout.setVisibility(View.GONE);
+                    voiceMode = true;
 
                 }
             }
         });
+    }
+
+    private void validateReceiveStart(){
+        if(mediaPlayer != null){
+            mediaPlayer.stop();
+            mediaPlayer.release();
+        }
+
+        Intent intent = getIntent();
+        Bundle bundle = intent.getExtras();
+        position = bundle.getInt("position", 0);
+        songs= (ArrayList) bundle.getParcelableArrayList("song");
+        songName = songs.get(position).getName();
+        String mSongName = intent.getStringExtra("name");
+
+        songNameText.setText(songName);
+        songNameText.setSelected(true);
+
+
+        Uri uri = Uri.parse(songs.get(position).toString());
+
+        mediaPlayer = MediaPlayer.create(SmartPlayerActivity.this, uri);
+        mediaPlayer.start();
+
     }
 
     private void checkVoiceCommandPermission(){

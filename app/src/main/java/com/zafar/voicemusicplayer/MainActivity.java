@@ -1,9 +1,12 @@
 package com.zafar.voicemusicplayer;
 
 import android.Manifest;
+import android.content.Intent;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -76,6 +79,20 @@ public class MainActivity extends AppCompatActivity {
 
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, itemsAll);
         songsList.setAdapter(arrayAdapter);
+
+        songsList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                String songName = songsList.getItemAtPosition(position).toString();
+
+                Intent intent = new Intent(MainActivity.this, SmartPlayerActivity.class);
+                intent.putExtra("song", songs);
+                intent.putExtra("songName", songName);
+                intent.putExtra("position", position);
+                startActivity(intent);
+                return true;
+            }
+        });
 
     }
 }
