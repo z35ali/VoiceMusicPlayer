@@ -44,6 +44,8 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private int position;
     private ArrayList<File> songs;
     private String songName;
+
+    private long backPressedTime;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,17 +106,21 @@ public class SmartPlayerActivity extends AppCompatActivity {
                 ArrayList<String> matchesFound = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
 
                 if (matchesFound != null){
-                    keeper = matchesFound.get(0);
 
-                    if (keeper.equals("pause") || keeper.equals("pause the song") || keeper.equals("pause song")){
-                        playPause();
-                        Toast.makeText(SmartPlayerActivity.this, "Command: "+ keeper, Toast.LENGTH_LONG).show();
-                    }else if (keeper.equals("play") || keeper.equals("play the song") || keeper.equals("play song")){
-                        playPause();
-                        Toast.makeText(SmartPlayerActivity.this, "Command: "+ keeper, Toast.LENGTH_LONG).show();
+                    if (voiceMode){
+                        keeper = matchesFound.get(0);
+
+                        if (keeper.equals("pause") || keeper.equals("pause the song") || keeper.equals("pause song")){
+                            playPause();
+                            Toast.makeText(SmartPlayerActivity.this, "Command: "+ keeper, Toast.LENGTH_LONG).show();
+                        }else if (keeper.equals("play") || keeper.equals("play the song") || keeper.equals("play song")){
+                            playPause();
+                            Toast.makeText(SmartPlayerActivity.this, "Command: "+ keeper, Toast.LENGTH_LONG).show();
+                        }
+
+                        Toast.makeText(SmartPlayerActivity.this, "Result = " + keeper, Toast.LENGTH_LONG).show();
+
                     }
-
-                    Toast.makeText(SmartPlayerActivity.this, "Result = " + keeper, Toast.LENGTH_LONG).show();
                 }
 
             }
@@ -222,4 +228,19 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
         }
     }
+
+
+    @Override
+    public void onBackPressed() {
+        if(backPressedTime + 2000 > System.currentTimeMillis()){
+            mediaPlayer.stop();
+            finish();
+            Toast.makeText(this, "Player Stopped", Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(this, "Press Back Again To Stop The Player And Select A New Song...", Toast.LENGTH_SHORT).show();
+        }
+        backPressedTime = System.currentTimeMillis();
+
+    }
+
 }

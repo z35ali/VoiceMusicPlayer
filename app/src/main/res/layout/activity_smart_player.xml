@@ -40,6 +40,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/upper"
+        android:visibility="gone"
         android:gravity="center">
 
         <ImageView
@@ -57,7 +58,7 @@
             android:src="@drawable/pause"
             android:layout_toEndOf="@+id/previous_btn"
             android:layout_marginRight="30dp"
-            android:visibility="invisible"/>
+           />
 
         <ImageView
             android:id="@+id/next_btn"
@@ -65,7 +66,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/next"
             android:layout_toEndOf="@+id/pause_play_btn"
-            android:visibility="invisible"/>
+          />
 
 
 
