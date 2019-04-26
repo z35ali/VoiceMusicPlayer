@@ -305,6 +305,8 @@ public class SmartPlayerActivity extends AppCompatActivity {
                 if (fromUser) {
                     mediaPlayer.seekTo(progress);
                     seekBar.setProgress(progress);
+                    startTime.setText(getTimeString(mediaPlayer.getCurrentPosition()));
+                    endTime.setText(getTimeString(mediaPlayer.getDuration()));
 
                     // When the seek bar is pushed to the end play the next song
                     if (progress == mediaPlayer.getDuration()) {
