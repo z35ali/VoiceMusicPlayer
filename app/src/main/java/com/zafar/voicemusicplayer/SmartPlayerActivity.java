@@ -290,7 +290,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
             Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
             imageView.setImageBitmap(bitmap);
         }else{
-            imageView.setImageResource(R.drawable.four);
+            imageView.setImageResource(R.drawable.music);
         }
 
         // Set seek bar to end at song ending
@@ -424,7 +424,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
             Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
             imageView.setImageBitmap(bitmap);
         }else{
-            imageView.setImageResource(R.drawable.four);
+            imageView.setImageResource(R.drawable.music);
         }
 
 
