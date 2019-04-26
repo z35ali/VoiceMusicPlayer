@@ -29,6 +29,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.single.PermissionListener;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -57,6 +64,8 @@ public class SmartPlayerActivity extends AppCompatActivity {
     Handler handler;
     Runnable runnable;
 
+    private boolean noRecordPermission = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,7 +90,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
         voiceMode = false;
 
         handler = new Handler();
-        validateReceiveStart();
+        checkRecordPermission();
 
         // Speech Recognizer initialization
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(SmartPlayerActivity.this);
@@ -194,8 +203,6 @@ public class SmartPlayerActivity extends AppCompatActivity {
         voiceEnableBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                checkVoiceCommandPermission();
-
                 voiceToggle();
             }
         });
@@ -227,6 +234,21 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
     }
 
+    public void checkRecordPermission(){
+        Dexter.withActivity(this)
+                .withPermission(Manifest.permission.RECORD_AUDIO)
+                .withListener(new PermissionListener() {
+                    @Override public void onPermissionGranted(PermissionGrantedResponse response) {
+                       validateReceiveStart();
+                    }
+                    @Override public void onPermissionDenied(PermissionDeniedResponse response) {
+                    noRecordPermission = true;
+                    }
+                    @Override public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
+                        token.continuePermissionRequest();
+                    }
+                }).check();
+    }
     private void validateReceiveStart() {
 
         // Stops the current media player
@@ -326,22 +348,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
     }
 
-    private void checkVoiceCommandPermission() {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-
-            if (!(ContextCompat.checkSelfPermission(SmartPlayerActivity.this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)) {
-                Toast.makeText(SmartPlayerActivity.this, "Accept Microphone Permission", Toast.LENGTH_SHORT).show();
-
-                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + getPackageName()));
-                startActivity(intent);
-
-                mediaPlayer.release();
-                mediaPlayer.stop();
-
-            }
-        }
-    }
 
 
     private void playPause() {
@@ -434,16 +441,20 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
     private void voiceToggle() {
 
-        // Toggles voice mode on and off as well as changing button text
-        if (voiceMode) {
-            voiceEnableBtn.setText("Voice Enabled - OFF");
-            voiceMode = false;
-            lowerLayout.setVisibility(View.VISIBLE);
-        } else {
-            voiceEnableBtn.setText("Voice Enabled - ON");
-            lowerLayout.setVisibility(View.GONE);
-            voiceMode = true;
+        if (!noRecordPermission) {
+            // Toggles voice mode on and off as well as changing button text
+            if (voiceMode) {
+                voiceEnableBtn.setText("Voice Enabled - OFF");
+                voiceMode = false;
+                lowerLayout.setVisibility(View.VISIBLE);
+            } else {
+                voiceEnableBtn.setText("Voice Enabled - ON");
+                lowerLayout.setVisibility(View.GONE);
+                voiceMode = true;
 
+            }
+        }else{
+            Toast.makeText(this, "No Record Permissions", Toast.LENGTH_SHORT).show();
         }
     }
 
