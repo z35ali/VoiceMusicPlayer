@@ -38,9 +38,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private String keeper = "";
 
     private ImageView pausePlayBtn, nextBtn, previousBtn;
-    private TextView songNameText;
-    private TextView startTime;
-    private TextView endTime;
+    private TextView songNameText, startTime, endTime;
     private ImageView imageView;
     private RelativeLayout lowerLayout;
     private Button voiceEnableBtn;
@@ -49,7 +47,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
     private MediaPlayer mediaPlayer;
     private int position;
-    private ArrayList<File> songs;
+    private ArrayList < File > songs;
     private String songName;
 
     private long backPressedTime;
@@ -61,7 +59,8 @@ public class SmartPlayerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_smart_player);
 
-        checkVoiceCommandPermission();
+
+        // Declare layouts
         parentRelativeLayout = findViewById(R.id.parentRelativeLayout);
         pausePlayBtn = findViewById(R.id.pause_play_btn);
         nextBtn = findViewById(R.id.next_btn);
@@ -71,28 +70,24 @@ public class SmartPlayerActivity extends AppCompatActivity {
         voiceEnableBtn = findViewById(R.id.voice_enable_btn);
         songNameText = findViewById(R.id.songName);
         seekBar = findViewById(R.id.seekBar);
-        voiceMode = false;
-        lowerLayout.setVisibility(View.VISIBLE);
-
-
-        handler = new Handler();
-
         startTime = findViewById(R.id.startTime);
         endTime = findViewById(R.id.endTime);
 
+        // Disable voice commands by default
+        lowerLayout.setVisibility(View.VISIBLE);
+        voiceMode = false;
 
+        handler = new Handler();
+        validateReceiveStart();
 
-
-
-
+        // Speech Recognizer initialization
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(SmartPlayerActivity.this);
         speechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
 
-        validateReceiveStart();
-        imageView.setBackgroundResource(R.drawable.four);
 
+        imageView.setBackgroundResource(R.drawable.four);
 
         speechRecognizer.setRecognitionListener(new RecognitionListener() {
             @Override
@@ -128,28 +123,29 @@ public class SmartPlayerActivity extends AppCompatActivity {
             @Override
             public void onResults(Bundle results) {
 
-                ArrayList<String> matchesFound = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                ArrayList < String > matchesFound = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
 
-                if (matchesFound != null){
+                if (matchesFound != null) {
 
-                    if (voiceMode){
+                    // If voiceMode is true check if spoken command equals required commands
+                    if (voiceMode) {
                         keeper = matchesFound.get(0);
 
-                        if (keeper.equals("pause") || keeper.equals("pause the song") || keeper.equals("pause song")){
+                        if (keeper.equals("pause") || keeper.equals("pause the song") || keeper.equals("pause song")) {
                             pause();
-                            Toast.makeText(SmartPlayerActivity.this, "Command: "+ keeper, Toast.LENGTH_LONG).show();
-                        }else if (keeper.equals("play") || keeper.equals("play the song") || keeper.equals("play song")){
+                            Toast.makeText(SmartPlayerActivity.this, "Command: " + keeper, Toast.LENGTH_LONG).show();
+                        } else if (keeper.equals("play") || keeper.equals("play the song") || keeper.equals("play song")) {
                             play();
-                            Toast.makeText(SmartPlayerActivity.this, "Command: "+ keeper, Toast.LENGTH_LONG).show();
-                        }else if (keeper.equals("next") || keeper.equals("next song") || keeper.equals("play the next song")){
+                            Toast.makeText(SmartPlayerActivity.this, "Command: " + keeper, Toast.LENGTH_LONG).show();
+                        } else if (keeper.equals("next") || keeper.equals("next song") || keeper.equals("play the next song")) {
                             next();
-                            Toast.makeText(SmartPlayerActivity.this, "Command: "+ keeper, Toast.LENGTH_LONG).show();
-                        }else if (keeper.equals("previous") || keeper.equals("previous song") || keeper.equals("play the previous song")){
+                            Toast.makeText(SmartPlayerActivity.this, "Command: " + keeper, Toast.LENGTH_LONG).show();
+                        } else if (keeper.equals("previous") || keeper.equals("previous song") || keeper.equals("play the previous song")) {
                             previous();
-                            Toast.makeText(SmartPlayerActivity.this, "Command: "+ keeper, Toast.LENGTH_LONG).show();
-                        }else if (keeper.equals("voice off") || keeper.equals("no voice") || keeper.equals("turn off voice") || keeper.equals("turn voice off")){
+                            Toast.makeText(SmartPlayerActivity.this, "Command: " + keeper, Toast.LENGTH_LONG).show();
+                        } else if (keeper.equals("voice off") || keeper.equals("no voice") || keeper.equals("turn off voice") || keeper.equals("turn voice off")) {
                             voiceToggle();
-                            Toast.makeText(SmartPlayerActivity.this, "Command: "+ keeper, Toast.LENGTH_LONG).show();
+                            Toast.makeText(SmartPlayerActivity.this, "Command: " + keeper, Toast.LENGTH_LONG).show();
                         }
 
                         Toast.makeText(SmartPlayerActivity.this, "Result = " + keeper, Toast.LENGTH_LONG).show();
@@ -169,11 +165,13 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
             }
         });
+
+        // Allows long press for voice mode
         parentRelativeLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
-                if(voiceMode) {
+                if (voiceMode) {
                     switch (event.getAction()) {
                         case MotionEvent.ACTION_DOWN:
                             speechRecognizer.startListening(speechRecognizerIntent);
@@ -193,7 +191,9 @@ public class SmartPlayerActivity extends AppCompatActivity {
         voiceEnableBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-             voiceToggle();
+                checkVoiceCommandPermission();
+
+                voiceToggle();
             }
         });
 
@@ -222,33 +222,30 @@ public class SmartPlayerActivity extends AppCompatActivity {
             }
         });
 
-
-
-
-
-
     }
 
-    private void validateReceiveStart(){
-        if(mediaPlayer != null){
+    private void validateReceiveStart() {
+
+        // Stops the current media player
+        if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.reset();
             mediaPlayer.release();
         }
 
+        // Gets file list from Main Activity and sets appropriate variables
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         position = bundle.getInt("position", 0);
-        songs= (ArrayList) bundle.getParcelableArrayList("song");
+        songs = (ArrayList) bundle.getParcelableArrayList("song");
         songName = songs.get(position).getName();
         String mSongName = intent.getStringExtra("name");
 
         songNameText.setText(songName);
         songNameText.setSelected(true);
 
-
+        // Gets current song and creates a media player for it
         Uri uri = Uri.parse(songs.get(position).toString());
-
         mediaPlayer = MediaPlayer.create(SmartPlayerActivity.this, uri);
 
         mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -259,24 +256,22 @@ public class SmartPlayerActivity extends AppCompatActivity {
             }
         });
 
+        // Set seek bar to end at song ending
         seekBar.setMax(mediaPlayer.getDuration());
         mediaPlayer.start();
 
         playCycle();
 
-
-
-
-
-
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser){
+                if (fromUser) {
                     mediaPlayer.seekTo(progress);
                     seekBar.setProgress(progress);
-                  if (progress==mediaPlayer.getDuration()){
-                    Log.d(mediaPlayer.getDuration()+"", "onProgressChanged: ");       next();
+
+                    // When the seek bar is pushed to the end play the next song
+                    if (progress == mediaPlayer.getDuration()) {
+                        next();
                     }
                 }
             }
@@ -294,47 +289,54 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
     }
 
-    private void playCycle(){
+    private void playCycle() {
+
+        // Move Seek Bar progress as well as start and end times on each playCycle() call
         seekBar.setProgress(mediaPlayer.getCurrentPosition());
         startTime.setText(getTimeString(mediaPlayer.getCurrentPosition()));
         endTime.setText(getTimeString(mediaPlayer.getDuration()));
 
-        if(mediaPlayer.isPlaying()){
+        if (mediaPlayer.isPlaying()) {
             runnable = new Runnable() {
                 @Override
                 public void run() {
 
+                    // Recursively runs function while media is playing
                     playCycle();
                 }
             };
-            handler.postDelayed(runnable, 1000 );
+            handler.postDelayed(runnable, 1000);
         }
 
 
     }
 
-    private void checkVoiceCommandPermission(){
+    private void checkVoiceCommandPermission() {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
-            if (!(ContextCompat.checkSelfPermission(SmartPlayerActivity.this,Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)){
+            if (!(ContextCompat.checkSelfPermission(SmartPlayerActivity.this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)) {
                 Toast.makeText(SmartPlayerActivity.this, "Accept Microphone Permission", Toast.LENGTH_SHORT).show();
 
                 Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + getPackageName()));
                 startActivity(intent);
-                finish();
+
+                mediaPlayer.release();
+                mediaPlayer.stop();
+
             }
         }
     }
 
-    private void playPause(){
 
-        if (mediaPlayer.isPlaying()){
+    private void playPause() {
+
+        if (mediaPlayer.isPlaying()) {
             imageView.setBackgroundResource(R.drawable.five);
             pausePlayBtn.setImageResource(R.drawable.play);
             mediaPlayer.pause();
 
-        }else{
+        } else {
             pausePlayBtn.setImageResource(R.drawable.pause);
             mediaPlayer.start();
             imageView.setBackgroundResource(R.drawable.four);
@@ -342,8 +344,8 @@ public class SmartPlayerActivity extends AppCompatActivity {
         }
     }
 
-    private void play(){
-        if (!mediaPlayer.isPlaying()){
+    private void play() {
+        if (!mediaPlayer.isPlaying()) {
             pausePlayBtn.setImageResource(R.drawable.pause);
             mediaPlayer.start();
             imageView.setBackgroundResource(R.drawable.four);
@@ -351,60 +353,36 @@ public class SmartPlayerActivity extends AppCompatActivity {
         }
     }
 
-    private void pause(){
-        if(mediaPlayer.isPlaying()){
+    private void pause() {
+        if (mediaPlayer.isPlaying()) {
             imageView.setBackgroundResource(R.drawable.five);
             pausePlayBtn.setImageResource(R.drawable.play);
             mediaPlayer.pause();
         }
     }
 
-    private void next(){
+    private void next() {
+        changeSong((position + 1) % songs.size());
+    }
 
+    private void previous() {
+        changeSong((position - 1) < 0 ? (songs.size() - 1) : (position - 1));
+    }
 
+    private void changeSong(int pos) {
 
-        if(mediaPlayer != null){
+        // Stops the current media player
+        if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.reset();
             mediaPlayer.release();
         }
-        position = (position+1)%songs.size();
+        position = pos;
 
-        File file = new File(songs.get(position).toString());
-        songName= file.getName();
-        songNameText.setText(songName);
-
-        songNameText.setSelected(true);
-
-
+        // Parses new song
         Uri uri = Uri.parse(songs.get(position).toString());
 
-        mediaPlayer = MediaPlayer.create(SmartPlayerActivity.this, uri);
-        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-
-                next();
-            }
-        });
-        seekBar.setMax(mediaPlayer.getDuration());
-        playPause();
-        mediaPlayer.start();
-        playCycle();
-        imageView.setBackgroundResource(R.drawable.four);
-
-
-
-    }
-
-    private void previous() {
-        mediaPlayer.pause();
-        mediaPlayer.stop();
-        mediaPlayer.release();
-
-        position = (position - 1) < 0 ? (songs.size() - 1) : (position - 1);
-        Uri uri = Uri.parse(songs.get(position).toString());
-
+        // Creates a new media player
         mediaPlayer = mediaPlayer.create(SmartPlayerActivity.this, uri);
         mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
@@ -413,25 +391,31 @@ public class SmartPlayerActivity extends AppCompatActivity {
                 next();
             }
         });
+
+        // Sets the songName Textview to the basename of the file path
         File file = new File(songs.get(position).toString());
         songName = file.getName();
         songNameText.setText(songName);
 
         playPause();
+
+
         mediaPlayer.start();
 
         playCycle();
 
+        // Change back to the play image
         imageView.setBackgroundResource(R.drawable.four);
-
     }
 
-    private void voiceToggle(){
-        if (voiceMode){
+    private void voiceToggle() {
+
+        // Toggles voice mode on and off as well as changing button text
+        if (voiceMode) {
             voiceEnableBtn.setText("Voice Enabled - OFF");
             voiceMode = false;
             lowerLayout.setVisibility(View.VISIBLE);
-        }else{
+        } else {
             voiceEnableBtn.setText("Voice Enabled - ON");
             lowerLayout.setVisibility(View.GONE);
             voiceMode = true;
@@ -442,15 +426,16 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private String getTimeString(long millis) {
         StringBuffer buf = new StringBuffer();
 
-        long hours = millis / (1000*60*60);
-        long minutes = ( millis % (1000*60*60) ) / (1000*60);
-        long seconds = ( ( millis % (1000*60*60) ) % (1000*60) ) / 1000;
+        long hours = millis / (1000 * 60 * 60);
+        long minutes = (millis % (1000 * 60 * 60)) / (1000 * 60);
+        long seconds = ((millis % (1000 * 60 * 60)) % (1000 * 60)) / 1000;
 
+        // Creates a buffered String that is the converted song length into hours, minutes, and seconds
         buf.append(String.format("%02d", hours));
-                buf.append(":");
-                buf.append(String.format("%02d", minutes));
-                buf.append(":");
-                buf.append(String.format("%02d", seconds));
+        buf.append(":");
+        buf.append(String.format("%02d", minutes));
+        buf.append(":");
+        buf.append(String.format("%02d", seconds));
 
         return buf.toString();
     }
@@ -458,18 +443,16 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if(backPressedTime + 2000 > System.currentTimeMillis()){
+
+        // Gives time between back press and closing activity, if pressed accidentally
+        if (backPressedTime + 2000 > System.currentTimeMillis()) {
             mediaPlayer.stop();
             finish();
             Toast.makeText(this, "Player Stopped", Toast.LENGTH_SHORT).show();
-        }else{
+        } else {
             Toast.makeText(this, "Press Back Again To Stop The Player And Select A New Song...", Toast.LENGTH_SHORT).show();
         }
         backPressedTime = System.currentTimeMillis();
 
     }
-
-
-
-
 }
