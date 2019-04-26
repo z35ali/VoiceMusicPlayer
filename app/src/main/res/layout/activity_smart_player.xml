@@ -8,6 +8,117 @@
     android:layout_height="match_parent"
     tools:context=".SmartPlayerActivity">
 
+    <RelativeLayout
+        android:id="@+id/upper"
+        android:layout_width="match_parent"
+        android:layout_height="330dp">
+
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="match_parent"
+            android:layout_height="270dp" />
+   <TextView
+       android:id="@+id/songName"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:layout_below="@+id/logo"
+       android:textSize="25dp"
+       android:textStyle="italic|bold"
+       android:textAllCaps="false"
+       android:textColor="@color/colorPrimaryDark"
+       android:layout_marginTop="7dp"
+       android:textAlignment="center"
+       android:marqueeRepeatLimit="marquee_forever"
+       android:ellipsize="marquee"/>
+
+
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/lower"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/upper"
+        android:visibility="gone"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/previous_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/previous"
+            android:layout_marginRight="30dp"
+            />
+
+        <ImageView
+            android:id="@+id/pause_play_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/pause"
+            android:layout_toEndOf="@+id/previous_btn"
+            android:layout_marginRight="30dp"
+           />
+
+        <ImageView
+            android:id="@+id/next_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/next"
+            android:layout_toEndOf="@+id/pause_play_btn"
+          />
+
+
+
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/voice_enable_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="80dp"
+        android:text="Voice Enabled - OFF"
+        android:background="@color/colorPrimary"
+        android:textColor="@android:color/white"
+        android:textSize="16dp"
+        android:textAllCaps="false"/>
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="47dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="77dp"
+        android:layout_marginEnd="78dp"
+        android:layout_marginBottom="187dp" />
+
+    <TextView
+        android:id="@+id/startTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="18dp"
+        android:layout_marginTop="18dp"
+        android:layout_marginBottom="204dp"
+        android:text="Start" />
+
+    <TextView
+        android:id="@+id/endTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="18dp"
+        android:layout_marginBottom="203dp"
+        android:text="End" />
+
+
+
+
 
 
 </RelativeLayout>
