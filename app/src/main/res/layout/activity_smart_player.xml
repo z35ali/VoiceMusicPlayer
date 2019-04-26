@@ -11,14 +11,14 @@
     <RelativeLayout
         android:id="@+id/upper"
         android:layout_width="match_parent"
-        android:layout_height="330dp">
+        android:layout_height="400dp">
 
         <ImageView
             android:id="@+id/logo"
             android:layout_width="match_parent"
             android:layout_height="270dp" />
    <TextView
-       android:id="@+id/songName"
+       android:id="@+id/songInfo"
        android:layout_width="match_parent"
        android:layout_height="wrap_content"
        android:layout_below="@+id/logo"
@@ -30,6 +30,8 @@
        android:textAlignment="center"
        android:marqueeRepeatLimit="marquee_forever"
        android:ellipsize="marquee"/>
+
+
 
 
 
@@ -49,6 +51,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/previous"
             android:layout_marginRight="30dp"
+
             />
 
         <ImageView
@@ -91,9 +94,9 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="77dp"
-        android:layout_marginEnd="78dp"
-        android:layout_marginBottom="187dp" />
+        android:layout_marginStart="74dp"
+        android:layout_marginEnd="81dp"
+        android:layout_marginBottom="161dp" />
 
     <TextView
         android:id="@+id/startTime"
@@ -101,9 +104,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="18dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="18dp"
-        android:layout_marginBottom="204dp"
+        android:layout_marginBottom="179dp"
         android:text="Start" />
 
     <TextView
@@ -112,8 +115,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginEnd="18dp"
-        android:layout_marginBottom="203dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="179dp"
         android:text="End" />
 
 
