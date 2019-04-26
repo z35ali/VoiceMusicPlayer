@@ -266,9 +266,6 @@ public class SmartPlayerActivity extends AppCompatActivity {
         songName = songs.get(position).getName();
         String mSongName = intent.getStringExtra("name");
 
-
-
-
         // Gets current song and creates a media player for it
         Uri uri = Uri.parse(songs.get(position).toString());
         mediaPlayer = MediaPlayer.create(SmartPlayerActivity.this, uri);
@@ -433,8 +430,10 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
         playPause();
 
-
+        // Set seek bar to end at song ending
+        seekBar.setMax(mediaPlayer.getDuration());
         mediaPlayer.start();
+        
 
         playCycle();
 
