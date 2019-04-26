@@ -433,7 +433,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
         // Set seek bar to end at song ending
         seekBar.setMax(mediaPlayer.getDuration());
         mediaPlayer.start();
-        
+
 
         playCycle();
 
