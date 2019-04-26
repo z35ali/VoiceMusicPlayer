@@ -45,7 +45,6 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                     @Override public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
-
                         token.continuePermissionRequest();
                     }
                 }).check();
