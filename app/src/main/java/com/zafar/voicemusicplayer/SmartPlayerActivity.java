@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.speech.RecognitionListener;
@@ -14,11 +15,13 @@ import android.speech.SpeechRecognizer;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,7 +42,8 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private ImageView imageView;
     private RelativeLayout lowerLayout;
     private Button voiceEnableBtn;
-    private boolean voiceMode = true;
+    SeekBar seekBar;
+    private boolean voiceMode;
 
     private MediaPlayer mediaPlayer;
     private int position;
@@ -47,6 +51,8 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private String songName;
 
     private long backPressedTime;
+    Handler handler;
+    Runnable runnable;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,6 +67,14 @@ public class SmartPlayerActivity extends AppCompatActivity {
         lowerLayout = findViewById(R.id.lower);
         voiceEnableBtn = findViewById(R.id.voice_enable_btn);
         songNameText = findViewById(R.id.songName);
+        seekBar = findViewById(R.id.seekBar);
+        voiceMode = false;
+        lowerLayout.setVisibility(View.VISIBLE);
+
+
+        handler = new Handler();
+
+
 
 
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(SmartPlayerActivity.this);
@@ -70,6 +84,8 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
         validateReceiveStart();
         imageView.setBackgroundResource(R.drawable.four);
+
+
         speechRecognizer.setRecognitionListener(new RecognitionListener() {
             @Override
             public void onReadyForSpeech(Bundle params) {
@@ -198,17 +214,17 @@ public class SmartPlayerActivity extends AppCompatActivity {
             }
         });
 
-        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                next();
-            }
-        });
+
+
+
+
+
     }
 
     private void validateReceiveStart(){
         if(mediaPlayer != null){
             mediaPlayer.stop();
+            mediaPlayer.reset();
             mediaPlayer.release();
         }
 
@@ -226,7 +242,61 @@ public class SmartPlayerActivity extends AppCompatActivity {
         Uri uri = Uri.parse(songs.get(position).toString());
 
         mediaPlayer = MediaPlayer.create(SmartPlayerActivity.this, uri);
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+
+                next();
+            }
+        });
+        seekBar.setMax(mediaPlayer.getDuration());
         mediaPlayer.start();
+        playCycle();
+
+
+
+
+
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser){
+                    mediaPlayer.seekTo(progress);
+                    seekBar.setProgress(progress);
+                  if (progress==mediaPlayer.getDuration()){
+                    Log.d(mediaPlayer.getDuration()+"", "onProgressChanged: ");       next();
+                    }
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+    }
+
+    private void playCycle(){
+        seekBar.setProgress(mediaPlayer.getCurrentPosition());
+
+        if(mediaPlayer.isPlaying()){
+            runnable = new Runnable() {
+                @Override
+                public void run() {
+
+                    playCycle();
+                }
+            };
+            handler.postDelayed(runnable, 1000 );
+        }
+
 
     }
 
@@ -276,22 +346,40 @@ public class SmartPlayerActivity extends AppCompatActivity {
     }
 
     private void next(){
-        mediaPlayer.pause();
-        mediaPlayer.stop();
-        mediaPlayer.release();
 
+
+
+        if(mediaPlayer != null){
+            mediaPlayer.stop();
+            mediaPlayer.reset();
+            mediaPlayer.release();
+        }
         position = (position+1)%songs.size();
-
-        Uri uri = Uri.parse(songs.get(position).toString());
-
-        mediaPlayer = mediaPlayer.create(SmartPlayerActivity.this, uri);
 
         File file = new File(songs.get(position).toString());
         songName= file.getName();
         songNameText.setText(songName);
 
+        songNameText.setSelected(true);
+
+
+        Uri uri = Uri.parse(songs.get(position).toString());
+
+        mediaPlayer = MediaPlayer.create(SmartPlayerActivity.this, uri);
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+
+                next();
+            }
+        });
+        seekBar.setMax(mediaPlayer.getDuration());
+        playPause();
         mediaPlayer.start();
+        playCycle();
         imageView.setBackgroundResource(R.drawable.four);
+
+
 
     }
 
@@ -304,12 +392,22 @@ public class SmartPlayerActivity extends AppCompatActivity {
         Uri uri = Uri.parse(songs.get(position).toString());
 
         mediaPlayer = mediaPlayer.create(SmartPlayerActivity.this, uri);
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
 
+                next();
+            }
+        });
         File file = new File(songs.get(position).toString());
         songName = file.getName();
         songNameText.setText(songName);
 
+        playPause();
         mediaPlayer.start();
+
+        playCycle();
+
         imageView.setBackgroundResource(R.drawable.four);
 
     }
@@ -340,5 +438,6 @@ public class SmartPlayerActivity extends AppCompatActivity {
         backPressedTime = System.currentTimeMillis();
 
     }
+
 
 }

@@ -79,13 +79,22 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_margin="80dp"
-        android:text="Voice Enabled - ON"
+        android:text="Voice Enabled - OFF"
         android:background="@color/colorPrimary"
         android:textColor="@android:color/white"
         android:textSize="16dp"
         android:textAllCaps="false"/>
 
-
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="229dp"
+        android:layout_height="47dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="77dp"
+        android:layout_marginEnd="78dp"
+        android:layout_marginBottom="187dp" />
 
 
 </RelativeLayout>
