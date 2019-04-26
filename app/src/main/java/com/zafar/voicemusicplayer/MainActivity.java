@@ -80,9 +80,9 @@ public class MainActivity extends AppCompatActivity {
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, itemsAll);
         songsList.setAdapter(arrayAdapter);
 
-        songsList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        songsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String songName = songsList.getItemAtPosition(position).toString();
 
                 Intent intent = new Intent(MainActivity.this, SmartPlayerActivity.class);
@@ -90,9 +90,9 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra("songName", songName);
                 intent.putExtra("position", position);
                 startActivity(intent);
-                return true;
             }
         });
+
 
     }
 }
