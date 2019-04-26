@@ -3,6 +3,9 @@ package com.zafar.voicemusicplayer;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -68,7 +71,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
         imageView = findViewById(R.id.logo);
         lowerLayout = findViewById(R.id.lower);
         voiceEnableBtn = findViewById(R.id.voice_enable_btn);
-        songNameText = findViewById(R.id.songName);
+        songNameText = findViewById(R.id.songInfo);
         seekBar = findViewById(R.id.seekBar);
         startTime = findViewById(R.id.startTime);
         endTime = findViewById(R.id.endTime);
@@ -87,7 +90,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
         speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
 
 
-        imageView.setBackgroundResource(R.drawable.four);
+
 
         speechRecognizer.setRecognitionListener(new RecognitionListener() {
             @Override
@@ -241,8 +244,8 @@ public class SmartPlayerActivity extends AppCompatActivity {
         songName = songs.get(position).getName();
         String mSongName = intent.getStringExtra("name");
 
-        songNameText.setText(songName);
-        songNameText.setSelected(true);
+
+
 
         // Gets current song and creates a media player for it
         Uri uri = Uri.parse(songs.get(position).toString());
@@ -255,6 +258,18 @@ public class SmartPlayerActivity extends AppCompatActivity {
                 next();
             }
         });
+
+        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        mmr.setDataSource(songs.get(position).toString());
+        byte [] data = mmr.getEmbeddedPicture();
+        getTrackInfo(songs.get(position).toString(), songName);
+
+        if (!(data == null)) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+            imageView.setImageBitmap(bitmap);
+        }else{
+            imageView.setImageResource(R.drawable.four);
+        }
 
         // Set seek bar to end at song ending
         seekBar.setMax(mediaPlayer.getDuration());
@@ -332,14 +347,13 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private void playPause() {
 
         if (mediaPlayer.isPlaying()) {
-            imageView.setBackgroundResource(R.drawable.five);
             pausePlayBtn.setImageResource(R.drawable.play);
             mediaPlayer.pause();
 
         } else {
             pausePlayBtn.setImageResource(R.drawable.pause);
             mediaPlayer.start();
-            imageView.setBackgroundResource(R.drawable.four);
+
 
         }
     }
@@ -348,15 +362,12 @@ public class SmartPlayerActivity extends AppCompatActivity {
         if (!mediaPlayer.isPlaying()) {
             pausePlayBtn.setImageResource(R.drawable.pause);
             mediaPlayer.start();
-            imageView.setBackgroundResource(R.drawable.four);
 
         }
     }
 
     private void pause() {
         if (mediaPlayer.isPlaying()) {
-            imageView.setBackgroundResource(R.drawable.five);
-            pausePlayBtn.setImageResource(R.drawable.play);
             mediaPlayer.pause();
         }
     }
@@ -395,7 +406,21 @@ public class SmartPlayerActivity extends AppCompatActivity {
         // Sets the songName Textview to the basename of the file path
         File file = new File(songs.get(position).toString());
         songName = file.getName();
-        songNameText.setText(songName);
+
+
+        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        mmr.setDataSource(songs.get(position).toString());
+        byte [] data = mmr.getEmbeddedPicture();
+        getTrackInfo(songs.get(position).toString(), songName);
+
+        if (!(data == null)) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+            imageView.setImageBitmap(bitmap);
+        }else{
+            imageView.setImageResource(R.drawable.four);
+        }
+
+
 
         playPause();
 
@@ -405,7 +430,6 @@ public class SmartPlayerActivity extends AppCompatActivity {
         playCycle();
 
         // Change back to the play image
-        imageView.setBackgroundResource(R.drawable.four);
     }
 
     private void voiceToggle() {
@@ -440,6 +464,22 @@ public class SmartPlayerActivity extends AppCompatActivity {
         return buf.toString();
     }
 
+    private void getTrackInfo(String path, String fileName) {
+        MediaMetadataRetriever metaRetriever= new MediaMetadataRetriever();
+        metaRetriever.setDataSource(path);
+        String artist = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+        String title = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+        String album = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+        if (artist == null || title == null || album == null) {
+            songNameText.setText("\nFile: "+ fileName+"\nNo Song Information Found");
+
+        }else{
+            songNameText.setText("Song: "+ title + "\nArtist: "+artist+"\nAlbum: "+ album);
+        }
+        songNameText.setSelected(true);
+
+
+    }
 
     @Override
     public void onBackPressed() {
