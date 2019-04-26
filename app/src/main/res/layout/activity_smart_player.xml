@@ -33,7 +33,6 @@
 
 
 
-
     </RelativeLayout>
 
     <RelativeLayout
@@ -87,7 +86,7 @@
 
     <SeekBar
         android:id="@+id/seekBar"
-        android:layout_width="229dp"
+        android:layout_width="match_parent"
         android:layout_height="47dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
@@ -95,6 +94,31 @@
         android:layout_marginStart="77dp"
         android:layout_marginEnd="78dp"
         android:layout_marginBottom="187dp" />
+
+    <TextView
+        android:id="@+id/startTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="18dp"
+        android:layout_marginTop="18dp"
+        android:layout_marginBottom="204dp"
+        android:text="Start" />
+
+    <TextView
+        android:id="@+id/endTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="18dp"
+        android:layout_marginBottom="203dp"
+        android:text="End" />
+
+
+
+
 
 
 </RelativeLayout>

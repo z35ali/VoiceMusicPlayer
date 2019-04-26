@@ -39,6 +39,8 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
     private ImageView pausePlayBtn, nextBtn, previousBtn;
     private TextView songNameText;
+    private TextView startTime;
+    private TextView endTime;
     private ImageView imageView;
     private RelativeLayout lowerLayout;
     private Button voiceEnableBtn;
@@ -53,6 +55,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private long backPressedTime;
     Handler handler;
     Runnable runnable;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +76,11 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
 
         handler = new Handler();
+
+        startTime = findViewById(R.id.startTime);
+        endTime = findViewById(R.id.endTime);
+
+
 
 
 
@@ -242,6 +250,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
         Uri uri = Uri.parse(songs.get(position).toString());
 
         mediaPlayer = MediaPlayer.create(SmartPlayerActivity.this, uri);
+
         mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
@@ -249,8 +258,10 @@ public class SmartPlayerActivity extends AppCompatActivity {
                 next();
             }
         });
+
         seekBar.setMax(mediaPlayer.getDuration());
         mediaPlayer.start();
+
         playCycle();
 
 
@@ -285,6 +296,8 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
     private void playCycle(){
         seekBar.setProgress(mediaPlayer.getCurrentPosition());
+        startTime.setText(getTimeString(mediaPlayer.getCurrentPosition()));
+        endTime.setText(getTimeString(mediaPlayer.getDuration()));
 
         if(mediaPlayer.isPlaying()){
             runnable = new Runnable() {
@@ -425,6 +438,22 @@ public class SmartPlayerActivity extends AppCompatActivity {
         }
     }
 
+    private String getTimeString(long millis) {
+        StringBuffer buf = new StringBuffer();
+
+        long hours = millis / (1000*60*60);
+        long minutes = ( millis % (1000*60*60) ) / (1000*60);
+        long seconds = ( ( millis % (1000*60*60) ) % (1000*60) ) / 1000;
+
+        buf.append(String.format("%02d", hours));
+                buf.append(":");
+                buf.append(String.format("%02d", minutes));
+                buf.append(":");
+                buf.append(String.format("%02d", seconds));
+
+        return buf.toString();
+    }
+
 
     @Override
     public void onBackPressed() {
@@ -438,6 +467,8 @@ public class SmartPlayerActivity extends AppCompatActivity {
         backPressedTime = System.currentTimeMillis();
 
     }
+
+
 
 
 }
