@@ -55,12 +55,11 @@ public class SmartPlayerActivity extends AppCompatActivity {
     SeekBar seekBar;
     private boolean voiceMode;
 
-    private MediaPlayer mediaPlayer;
+    private static MediaPlayer mediaPlayer;
     private int position;
     private ArrayList < File > songs;
     private String songName;
 
-    private long backPressedTime;
     Handler handler;
     Runnable runnable;
 
@@ -494,18 +493,5 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    public void onBackPressed() {
 
-        // Gives time between back press and closing activity, if pressed accidentally
-        if (backPressedTime + 2000 > System.currentTimeMillis()) {
-            mediaPlayer.stop();
-            finish();
-            Toast.makeText(this, "Player Stopped", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "Press Back Again To Stop The Player And Select A New Song...", Toast.LENGTH_SHORT).show();
-        }
-        backPressedTime = System.currentTimeMillis();
-
-    }
 }
