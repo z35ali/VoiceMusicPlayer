@@ -9,10 +9,11 @@
 <TextView
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:text="File List"
+    android:text="Songs List"
     android:textSize="50dp"
     android:textStyle="bold"
     android:textAlignment="center"
+    android:textColor="@color/colorPrimary"
     android:layout_marginBottom="100dp"/>
     <ListView
         android:id="@+id/songNames"

@@ -1,6 +1,12 @@
 package com.zafar.voicemusicplayer;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -15,6 +21,7 @@ import android.provider.Settings;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -55,12 +62,16 @@ public class SmartPlayerActivity extends AppCompatActivity {
     SeekBar seekBar;
     private boolean voiceMode;
 
-    private MediaPlayer mediaPlayer;
+    private static MediaPlayer mediaPlayer;
     private int position;
     private ArrayList < File > songs;
     private String songName;
+    private String title;
 
-    private long backPressedTime;
+    private boolean playing = false;
+
+
+
     Handler handler;
     Runnable runnable;
 
@@ -91,6 +102,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
         handler = new Handler();
         checkRecordPermission();
+        showNotification();
 
         // Speech Recognizer initialization
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(SmartPlayerActivity.this);
@@ -234,6 +246,49 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
     }
 
+   private void showNotification() {
+      NotificationManager mNotificationManager;
+
+       NotificationCompat.Builder mBuilder =
+               new NotificationCompat.Builder(getApplicationContext(), "notify_001");
+       Intent intent = new Intent(this, SmartPlayerActivity.class);
+       intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+       PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+
+       NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
+
+       if (playing) {
+           bigText.setBigContentTitle(title + " is playing!");
+       }else{
+           bigText.setBigContentTitle(title + " is paused!");
+       }
+
+       mBuilder.setContentIntent(pendingIntent);
+       mBuilder.setSmallIcon(R.mipmap.ic_launcher_round);
+       mBuilder.setContentText("Tap to go back to player");
+       mBuilder.setPriority(Notification.PRIORITY_MIN);
+       mBuilder.setStyle(bigText);
+
+       mNotificationManager =
+               (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+
+       if (Build.VERSION.SDK_INT >= 26)
+       {
+           String channelId = "Your_channel_id";
+           NotificationChannel channel = new NotificationChannel(channelId,
+                   "Channel readable title", NotificationManager.IMPORTANCE_DEFAULT);
+           channel.enableVibration(false);
+           channel.setSound(null, null);
+
+           mNotificationManager.createNotificationChannel(channel);
+           mBuilder.setChannelId(channelId);
+       }
+
+       mNotificationManager.notify(0, mBuilder.build());
+   }
+
     public void checkRecordPermission(){
         Dexter.withActivity(this)
                 .withPermission(Manifest.permission.RECORD_AUDIO)
@@ -258,6 +313,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
             mediaPlayer.release();
         }
 
+
         // Gets file list from Main Activity and sets appropriate variables
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
@@ -265,9 +321,6 @@ public class SmartPlayerActivity extends AppCompatActivity {
         songs = (ArrayList) bundle.getParcelableArrayList("song");
         songName = songs.get(position).getName();
         String mSongName = intent.getStringExtra("name");
-
-
-
 
         // Gets current song and creates a media player for it
         Uri uri = Uri.parse(songs.get(position).toString());
@@ -290,12 +343,14 @@ public class SmartPlayerActivity extends AppCompatActivity {
             Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
             imageView.setImageBitmap(bitmap);
         }else{
-            imageView.setImageResource(R.drawable.four);
+            imageView.setImageResource(R.drawable.music);
         }
 
         // Set seek bar to end at song ending
         seekBar.setMax(mediaPlayer.getDuration());
         mediaPlayer.start();
+        playing = true;
+        showNotification();
 
         playCycle();
 
@@ -305,6 +360,8 @@ public class SmartPlayerActivity extends AppCompatActivity {
                 if (fromUser) {
                     mediaPlayer.seekTo(progress);
                     seekBar.setProgress(progress);
+                    startTime.setText(getTimeString(mediaPlayer.getCurrentPosition()));
+                    endTime.setText(getTimeString(mediaPlayer.getDuration()));
 
                     // When the seek bar is pushed to the end play the next song
                     if (progress == mediaPlayer.getDuration()) {
@@ -356,26 +413,33 @@ public class SmartPlayerActivity extends AppCompatActivity {
         if (mediaPlayer.isPlaying()) {
             pausePlayBtn.setImageResource(R.drawable.play);
             mediaPlayer.pause();
+            playing = false;
+
 
         } else {
             pausePlayBtn.setImageResource(R.drawable.pause);
             mediaPlayer.start();
-
-
+            playing = true;
         }
+        showNotification();
+
     }
 
     private void play() {
         if (!mediaPlayer.isPlaying()) {
             pausePlayBtn.setImageResource(R.drawable.pause);
             mediaPlayer.start();
-
+            playing = true;
+            showNotification();
         }
     }
 
     private void pause() {
         if (mediaPlayer.isPlaying()) {
+            pausePlayBtn.setImageResource(R.drawable.play);
             mediaPlayer.pause();
+            playing = false;
+            showNotification();
         }
     }
 
@@ -424,15 +488,15 @@ public class SmartPlayerActivity extends AppCompatActivity {
             Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
             imageView.setImageBitmap(bitmap);
         }else{
-            imageView.setImageResource(R.drawable.four);
+            imageView.setImageResource(R.drawable.music);
         }
-
-
 
         playPause();
 
-
+        // Set seek bar to end at song ending
+        seekBar.setMax(mediaPlayer.getDuration());
         mediaPlayer.start();
+
 
         playCycle();
 
@@ -448,7 +512,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
                 voiceMode = false;
                 lowerLayout.setVisibility(View.VISIBLE);
             } else {
-                voiceEnableBtn.setText("Voice Enabled - ON");
+                voiceEnableBtn.setText("Voice Enabled - ON \nHold Anywhere to Trigger");
                 lowerLayout.setVisibility(View.GONE);
                 voiceMode = true;
 
@@ -479,10 +543,11 @@ public class SmartPlayerActivity extends AppCompatActivity {
         MediaMetadataRetriever metaRetriever= new MediaMetadataRetriever();
         metaRetriever.setDataSource(path);
         String artist = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-        String title = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+         title = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
         String album = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
         if (artist == null || title == null || album == null) {
             songNameText.setText("\nFile: "+ fileName+"\nNo Song Information Found");
+            title = "Unknown Song";
 
         }else{
             songNameText.setText("Song: "+ title + "\nArtist: "+artist+"\nAlbum: "+ album);
@@ -494,16 +559,9 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-
-        // Gives time between back press and closing activity, if pressed accidentally
-        if (backPressedTime + 2000 > System.currentTimeMillis()) {
-            mediaPlayer.stop();
-            finish();
-            Toast.makeText(this, "Player Stopped", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "Press Back Again To Stop The Player And Select A New Song...", Toast.LENGTH_SHORT).show();
-        }
-        backPressedTime = System.currentTimeMillis();
-
+        super.onBackPressed();
+        String ns = Context.NOTIFICATION_SERVICE;
+        NotificationManager nMgr = (NotificationManager) getSystemService(ns);
+        nMgr.cancel(0);
     }
 }

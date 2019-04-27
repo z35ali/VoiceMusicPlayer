@@ -1,6 +1,8 @@
 package com.zafar.voicemusicplayer;
 
 import android.Manifest;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -31,12 +33,15 @@ public class MainActivity extends AppCompatActivity {
 
     private String[] itemsAll;
     private ListView songsList;
+    private long backPressedTime;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         songsList = findViewById(R.id.songNames);
         appExternalStoragePermission();
+
     }
 
     public void appExternalStoragePermission(){
@@ -98,6 +103,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        // Gives time between back press and closing activity, if pressed accidentally
+        if (backPressedTime + 2000 > System.currentTimeMillis()) {
+            finish();
+        } else {
+            Toast.makeText(this, "Press Back Again To Exit", Toast.LENGTH_SHORT).show();
+        }
+        backPressedTime = System.currentTimeMillis();
 
     }
 }
