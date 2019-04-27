@@ -122,9 +122,19 @@ public class MainActivity extends AppCompatActivity {
 
         // Gives time between back press and closing activity, if pressed accidentally
         if (backPressedTime + 2000 > System.currentTimeMillis()) {
-            finish();
-        } else {
+            if (SmartPlayerActivity.getMediaPlayer() == null){
+                finish();
+            }else {
+                Intent openMainActivity = new Intent(getApplicationContext(), SmartPlayerActivity.class);
+                openMainActivity.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivityIfNeeded(openMainActivity, 0);
+            }
+        } else if (SmartPlayerActivity.getMediaPlayer() == null) {
             Toast.makeText(this, "Press Back Again To Exit", Toast.LENGTH_SHORT).show();
+
+        }else{
+
+            Toast.makeText(this, "Press Back Again To Player If Started", Toast.LENGTH_SHORT).show();
         }
         backPressedTime = System.currentTimeMillis();
 
