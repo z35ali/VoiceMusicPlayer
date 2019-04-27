@@ -564,4 +564,12 @@ public class SmartPlayerActivity extends AppCompatActivity {
         NotificationManager nMgr = (NotificationManager) getSystemService(ns);
         nMgr.cancel(0);
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        String ns = Context.NOTIFICATION_SERVICE;
+        NotificationManager nMgr = (NotificationManager) getSystemService(ns);
+        nMgr.cancel(0);
+    }
 }
