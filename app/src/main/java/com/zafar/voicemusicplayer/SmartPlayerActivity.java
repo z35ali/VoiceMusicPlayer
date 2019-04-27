@@ -562,6 +562,10 @@ public class SmartPlayerActivity extends AppCompatActivity {
         return songName;
     }
 
+    public static MediaPlayer getMediaPlayer(){
+        return mediaPlayer;
+    }
+
     @Override
     public void onBackPressed() {
         moveTaskToBack(true);
