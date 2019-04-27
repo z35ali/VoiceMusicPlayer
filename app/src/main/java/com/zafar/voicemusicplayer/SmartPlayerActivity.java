@@ -66,7 +66,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private int position;
     private ArrayList < File > songs;
     private static String songName;
-    private  String title;
+    private  static String title;
 
     private boolean playing = false;
 
@@ -103,6 +103,8 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
         handler = new Handler();
         checkRecordPermission();
+
+
         showNotification();
 
         // Speech Recognizer initialization
@@ -282,9 +284,10 @@ public class SmartPlayerActivity extends AppCompatActivity {
                    "Channel readable title", NotificationManager.IMPORTANCE_DEFAULT);
            channel.enableVibration(false);
            channel.setSound(null, null);
-
+           mBuilder.setOngoing(true);
            mNotificationManager.createNotificationChannel(channel);
            mBuilder.setChannelId(channelId);
+
        }
 
        mNotificationManager.notify(0, mBuilder.build());
@@ -390,6 +393,10 @@ public class SmartPlayerActivity extends AppCompatActivity {
         seekBar.setProgress(mediaPlayer.getCurrentPosition());
         startTime.setText(getTimeString(mediaPlayer.getCurrentPosition()));
         endTime.setText(getTimeString(mediaPlayer.getDuration()));
+
+        // Handles accidental notification close
+        showNotification();
+
 
         if (mediaPlayer.isPlaying()) {
             runnable = new Runnable() {
@@ -570,7 +577,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
     public void onBackPressed() {
         moveTaskToBack(true);
         Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
+        startActivityIfNeeded(intent, 0);
 
 
     }
