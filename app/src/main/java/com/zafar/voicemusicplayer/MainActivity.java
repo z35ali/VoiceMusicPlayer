@@ -114,6 +114,21 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
+        songsList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+
+                // If long click play another song restart current song
+                String songName = songsList.getItemAtPosition(position).toString();
+                Intent intent = new Intent(MainActivity.this, SmartPlayerActivity.class);
+                intent.putExtra("song", songs);
+                intent.putExtra("songName", songName);
+                intent.putExtra("position", position);
+                startActivity(intent);
+                return false;
+            }
+        });
+
 
     }
 
