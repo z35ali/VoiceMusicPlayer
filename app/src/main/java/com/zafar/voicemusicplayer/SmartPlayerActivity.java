@@ -65,8 +65,8 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private static MediaPlayer mediaPlayer;
     private int position;
     private ArrayList < File > songs;
-    private String songName;
-    private String title;
+    private static String songName;
+    private  String title;
 
     private boolean playing = false;
 
@@ -76,6 +76,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
     Runnable runnable;
 
     private boolean noRecordPermission = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -557,12 +558,17 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
     }
 
+    public static String getCurrentSong(){
+        return songName;
+    }
+
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        String ns = Context.NOTIFICATION_SERVICE;
-        NotificationManager nMgr = (NotificationManager) getSystemService(ns);
-        nMgr.cancel(0);
+        moveTaskToBack(true);
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+
+
     }
 
     @Override
