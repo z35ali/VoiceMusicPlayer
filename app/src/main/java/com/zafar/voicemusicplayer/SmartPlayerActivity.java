@@ -559,10 +559,11 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        String ns = Context.NOTIFICATION_SERVICE;
-        NotificationManager nMgr = (NotificationManager) getSystemService(ns);
-        nMgr.cancel(0);
+        moveTaskToBack(true);
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+
+
     }
 
     @Override
