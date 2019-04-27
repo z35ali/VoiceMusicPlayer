@@ -374,6 +374,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
     private void pause() {
         if (mediaPlayer.isPlaying()) {
+            pausePlayBtn.setImageResource(R.drawable.play);
             mediaPlayer.pause();
         }
     }
@@ -449,7 +450,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
                 voiceMode = false;
                 lowerLayout.setVisibility(View.VISIBLE);
             } else {
-                voiceEnableBtn.setText("Voice Enabled - ON");
+                voiceEnableBtn.setText("Voice Enabled - ON \nHold Anywhere to Trigger");
                 lowerLayout.setVisibility(View.GONE);
                 voiceMode = true;
 
