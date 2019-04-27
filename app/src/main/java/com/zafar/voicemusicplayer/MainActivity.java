@@ -95,12 +95,23 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String songName = songsList.getItemAtPosition(position).toString();
 
-                Intent intent = new Intent(MainActivity.this, SmartPlayerActivity.class);
-                intent.putExtra("song", songs);
-                intent.putExtra("songName", songName);
-                intent.putExtra("position", position);
-                startActivity(intent);
+
+                if (SmartPlayerActivity.getCurrentSong() != null && SmartPlayerActivity.getCurrentSong().equals(songName) ) {
+                    Intent openMainActivity = new Intent(getApplicationContext(), SmartPlayerActivity.class);
+                    openMainActivity.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivityIfNeeded(openMainActivity, 0);
+                } else {
+
+
+                    Intent intent = new Intent(MainActivity.this, SmartPlayerActivity.class);
+                    intent.putExtra("song", songs);
+                    intent.putExtra("songName", songName);
+                    intent.putExtra("position", position);
+                    startActivity(intent);
+                }
             }
+
+
         });
 
 
@@ -117,5 +128,13 @@ public class MainActivity extends AppCompatActivity {
         }
         backPressedTime = System.currentTimeMillis();
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        String ns = Context.NOTIFICATION_SERVICE;
+        NotificationManager nMgr = (NotificationManager) getSystemService(ns);
+        nMgr.cancel(0);
     }
 }
