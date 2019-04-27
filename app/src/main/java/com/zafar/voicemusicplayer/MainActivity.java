@@ -1,6 +1,8 @@
 package com.zafar.voicemusicplayer;
 
 import android.Manifest;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -39,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         songsList = findViewById(R.id.songNames);
         appExternalStoragePermission();
+
     }
 
     public void appExternalStoragePermission(){
