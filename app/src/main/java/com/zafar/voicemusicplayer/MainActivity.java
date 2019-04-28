@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
         refresh = findViewById(R.id.refresh_btn);
         handler = new Handler();
         appExternalStoragePermission();
+        displaySongNames();
 
        animation = new RotateAnimation(0.0f, 360.0f,
                 Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF,
@@ -62,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                displaySongNames();
+
                 ((ImageView)findViewById(R.id.refresh_btn)).setAnimation(animation);
                 runnable = new Runnable() {
                     @Override
