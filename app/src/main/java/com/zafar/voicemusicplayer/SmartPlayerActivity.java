@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -28,6 +29,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -54,7 +57,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private Intent speechRecognizerIntent;
     private String keeper = "";
 
-    private ImageView pausePlayBtn, nextBtn, previousBtn;
+    private ImageView pausePlayBtn, nextBtn, previousBtn, loopBtn;
     private TextView songNameText, startTime, endTime;
     private ImageView imageView;
     private RelativeLayout lowerLayout;
@@ -67,8 +70,8 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private ArrayList < File > songs;
     private static String songName;
     private  static String title;
-
     private boolean playing = false;
+    private boolean loop;
 
 
 
@@ -89,6 +92,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
         pausePlayBtn = findViewById(R.id.pause_play_btn);
         nextBtn = findViewById(R.id.next_btn);
         previousBtn = findViewById(R.id.previous_btn);
+        loopBtn = findViewById(R.id.loop_btn);
         imageView = findViewById(R.id.logo);
         lowerLayout = findViewById(R.id.lower);
         voiceEnableBtn = findViewById(R.id.voice_enable_btn);
@@ -100,10 +104,12 @@ public class SmartPlayerActivity extends AppCompatActivity {
         // Disable voice commands by default
         lowerLayout.setVisibility(View.VISIBLE);
         voiceMode = false;
+        loop = false;
 
-        handler = new Handler();
-        checkRecordPermission();
 
+
+                handler = new Handler();
+                checkRecordPermission();
 
         showNotification();
 
@@ -242,12 +248,32 @@ public class SmartPlayerActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (mediaPlayer.getCurrentPosition() > 0) {
+
                     next();
                 }
             }
         });
 
+        loopBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (loop) {
+                    loopBtn.setColorFilter(Color.BLACK);
+                    loop = false;
+                } else{
+                    loopBtn.setColorFilter(Color.RED);
+                    loop = true;
+                }
+            }
+        });
+
     }
+
+
+
+
+
+
 
    private void showNotification() {
       NotificationManager mNotificationManager;
@@ -334,7 +360,12 @@ public class SmartPlayerActivity extends AppCompatActivity {
             @Override
             public void onCompletion(MediaPlayer mp) {
 
-                next();
+                if (loop){
+                    loopSong();
+                }else{
+                    next();
+                }
+
             }
         });
 
@@ -459,6 +490,11 @@ public class SmartPlayerActivity extends AppCompatActivity {
         changeSong((position - 1) < 0 ? (songs.size() - 1) : (position - 1));
     }
 
+    private void loopSong() {
+        changeSong((position) % songs.size());
+        mediaPlayer.start();
+    }
+
     private void changeSong(int pos) {
 
         // Stops the current media player
@@ -478,7 +514,11 @@ public class SmartPlayerActivity extends AppCompatActivity {
             @Override
             public void onCompletion(MediaPlayer mp) {
 
-                next();
+                if (loop){
+                    loopSong();
+                }else{
+                    next();
+                }
             }
         });
 
@@ -508,7 +548,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
         playCycle();
 
-        // Change back to the play image
+
     }
 
     private void voiceToggle() {

@@ -5,16 +5,21 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -34,13 +39,45 @@ public class MainActivity extends AppCompatActivity {
     private String[] itemsAll;
     private ListView songsList;
     private long backPressedTime;
+    private ImageView refresh;
+    private  Animation animation;
+    Runnable runnable;
 
+    Handler handler;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         songsList = findViewById(R.id.songNames);
+        refresh = findViewById(R.id.refresh_btn);
+        handler = new Handler();
         appExternalStoragePermission();
+        displaySongNames();
+       animation = new RotateAnimation(0.0f, 360.0f,
+                Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF,
+                0.5f);
+        animation.setRepeatCount(-1);
+        animation.setDuration(2000);
+
+        refresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                displaySongNames();
+                ((ImageView)findViewById(R.id.refresh_btn)).setAnimation(animation);
+                runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        ((ImageView)findViewById(R.id.refresh_btn)).clearAnimation();
+
+                    }
+                };
+                handler.postDelayed(runnable, 2000);
+
+
+
+
+            }
+        });
 
     }
 
@@ -49,7 +86,6 @@ public class MainActivity extends AppCompatActivity {
                 .withPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
                 .withListener(new PermissionListener() {
                     @Override public void onPermissionGranted(PermissionGrantedResponse response) {
-                        displaySongNames();
                     }
                     @Override public void onPermissionDenied(PermissionDeniedResponse response) {
 

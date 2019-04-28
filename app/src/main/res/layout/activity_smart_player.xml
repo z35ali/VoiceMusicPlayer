@@ -42,8 +42,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/upper"
-        android:visibility="gone"
-        android:gravity="center">
+        android:gravity="center"
+        android:layout_marginLeft="70dp" >
 
         <ImageView
             android:id="@+id/previous_btn"
@@ -69,7 +69,18 @@
             android:layout_height="wrap_content"
             android:src="@drawable/next"
             android:layout_toEndOf="@+id/pause_play_btn"
+            android:layout_marginRight="30dp"
           />
+
+        <ImageView
+            android:id="@+id/loop_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/loop"
+            android:layout_toEndOf="@+id/next_btn"
+            android:paddingTop="5dp"
+            />
+
 
 
 

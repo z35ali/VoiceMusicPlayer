@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 <TextView
+    android:id="@+id/songsList"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:text="Songs List"
@@ -15,6 +16,17 @@
     android:textAlignment="center"
     android:textColor="@color/colorPrimary"
     android:layout_marginBottom="100dp"/>
+
+    <ImageView
+        android:id="@+id/refresh_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/songsList"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="20dp"
+
+        android:layout_marginEnd="20dp"
+        android:src="@drawable/refresh" />
     <ListView
         android:id="@+id/songNames"
         android:layout_width="match_parent"
