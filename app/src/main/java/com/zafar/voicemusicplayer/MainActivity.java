@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         refresh = findViewById(R.id.refresh_btn);
         handler = new Handler();
         appExternalStoragePermission();
-        displaySongNames();
+
        animation = new RotateAnimation(0.0f, 360.0f,
                 Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF,
                 0.5f);
@@ -86,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
                 .withPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
                 .withListener(new PermissionListener() {
                     @Override public void onPermissionGranted(PermissionGrantedResponse response) {
+                        displaySongNames();
                     }
                     @Override public void onPermissionDenied(PermissionDeniedResponse response) {
 

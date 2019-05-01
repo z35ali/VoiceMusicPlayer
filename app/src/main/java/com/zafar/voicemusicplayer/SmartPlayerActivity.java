@@ -296,15 +296,13 @@ public class SmartPlayerActivity extends AppCompatActivity {
        mBuilder.setContentIntent(pendingIntent);
        mBuilder.setSmallIcon(R.mipmap.ic_launcher_round);
        mBuilder.setContentText("Tap to go back to player");
-       mBuilder.setPriority(Notification.PRIORITY_MIN);
        mBuilder.setStyle(bigText);
 
        mNotificationManager =
                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
 
-       if (Build.VERSION.SDK_INT >= 26)
-       {
+
            String channelId = "Your_channel_id";
            NotificationChannel channel = new NotificationChannel(channelId,
                    "Channel readable title", NotificationManager.IMPORTANCE_DEFAULT);
@@ -314,7 +312,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
            mNotificationManager.createNotificationChannel(channel);
            mBuilder.setChannelId(channelId);
 
-       }
+
 
        mNotificationManager.notify(0, mBuilder.build());
    }
@@ -595,7 +593,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
         String album = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
         if (artist == null || title == null || album == null) {
             songNameText.setText("\nFile: "+ fileName+"\nNo Song Information Found");
-            title = "Unknown Song";
+            title = fileName;
 
         }else{
             songNameText.setText("Song: "+ title + "\nArtist: "+artist+"\nAlbum: "+ album);
