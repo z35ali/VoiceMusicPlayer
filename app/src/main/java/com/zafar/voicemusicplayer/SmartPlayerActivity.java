@@ -435,9 +435,11 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
         playPause();
         if(res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-            mediaPlayer.start();        }
+            mediaPlayer.start();
+            playing = true;
+        }
 
-        playing = true;
+
         showNotification();
 
 
