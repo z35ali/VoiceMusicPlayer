@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -26,6 +27,8 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -49,6 +52,11 @@ import com.karumi.dexter.listener.single.PermissionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Locale;
+
+import static android.media.AudioManager.AUDIOFOCUS_GAIN;
+import static android.media.AudioManager.AUDIOFOCUS_LOSS;
+import static android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT;
+import static android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK;
 
 public class SmartPlayerActivity extends AppCompatActivity {
 
@@ -81,6 +89,13 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private boolean noRecordPermission = false;
 
 
+    AudioManager audioManager;
+    AudioManager.OnAudioFocusChangeListener afChangeListener;
+    int res;
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -109,9 +124,15 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
 
                 handler = new Handler();
-                checkRecordPermission();
 
-        showNotification();
+
+          audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+
+
+
+        res = audioManager.requestAudioFocus(afChangeListener, AudioManager.STREAM_MUSIC, // Music streaming
+                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT); // Permanent focus
+
 
         // Speech Recognizer initialization
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(SmartPlayerActivity.this);
@@ -267,6 +288,33 @@ public class SmartPlayerActivity extends AppCompatActivity {
             }
         });
 
+        afChangeListener =
+                new AudioManager.OnAudioFocusChangeListener() {
+                    public void onAudioFocusChange(int focusChange) {
+                        Log.d(""+focusChange, "onAudioFocusChange: ");
+                        if (focusChange == AUDIOFOCUS_LOSS) {
+                            // Permanent loss of audio focus
+                            pause();
+                        }
+                        else if (focusChange == AUDIOFOCUS_LOSS_TRANSIENT) {
+                            // Pause playback
+                           pause();
+                        } else if (focusChange == AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
+                            // Lower the volume, keep playing
+                            mediaPlayer.setVolume(0.2f, 0.2f);
+                        } else if (focusChange == audioManager.AUDIOFOCUS_GAIN) {
+                            // Your app has been granted audio focus again
+                            // Raise volume to normal, restart playback if necessary
+                           play();
+                        }
+                    }
+                };
+
+        checkRecordPermission();
+
+        showNotification();
+
+
     }
 
 
@@ -322,7 +370,10 @@ public class SmartPlayerActivity extends AppCompatActivity {
                 .withPermission(Manifest.permission.RECORD_AUDIO)
                 .withListener(new PermissionListener() {
                     @Override public void onPermissionGranted(PermissionGrantedResponse response) {
-                       validateReceiveStart();
+                            validateReceiveStart();
+
+
+
                     }
                     @Override public void onPermissionDenied(PermissionDeniedResponse response) {
                     noRecordPermission = true;
@@ -381,9 +432,16 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
         // Set seek bar to end at song ending
         seekBar.setMax(mediaPlayer.getDuration());
-        mediaPlayer.start();
-        playing = true;
+
+        playPause();
+        if(res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            mediaPlayer.start();
+            playing = true;
+        }
+
+
         showNotification();
+
 
         playCycle();
 
@@ -449,24 +507,40 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
         if (mediaPlayer.isPlaying()) {
             pausePlayBtn.setImageResource(R.drawable.play);
+
+            res = audioManager.requestAudioFocus(afChangeListener, AudioManager.STREAM_MUSIC, AUDIOFOCUS_LOSS_TRANSIENT);
             mediaPlayer.pause();
+
+
             playing = false;
 
 
         } else {
             pausePlayBtn.setImageResource(R.drawable.pause);
+
+            res = audioManager.requestAudioFocus(afChangeListener, AudioManager.STREAM_MUSIC, AUDIOFOCUS_GAIN);
+
             mediaPlayer.start();
             playing = true;
         }
         showNotification();
+
+        playCycle();
 
     }
 
     private void play() {
         if (!mediaPlayer.isPlaying()) {
             pausePlayBtn.setImageResource(R.drawable.pause);
-            mediaPlayer.start();
-            playing = true;
+
+            res = audioManager.requestAudioFocus(afChangeListener, AudioManager.STREAM_MUSIC, AUDIOFOCUS_GAIN);
+
+
+                mediaPlayer.start();
+
+                playing = true;
+
+
             showNotification();
         }
     }
@@ -474,6 +548,8 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private void pause() {
         if (mediaPlayer.isPlaying()) {
             pausePlayBtn.setImageResource(R.drawable.play);
+            res = audioManager.requestAudioFocus(afChangeListener, AudioManager.STREAM_MUSIC, AUDIOFOCUS_LOSS_TRANSIENT);
+
             mediaPlayer.pause();
             playing = false;
             showNotification();
@@ -626,5 +702,6 @@ public class SmartPlayerActivity extends AppCompatActivity {
         String ns = Context.NOTIFICATION_SERVICE;
         NotificationManager nMgr = (NotificationManager) getSystemService(ns);
         nMgr.cancel(0);
+        audioManager.abandonAudioFocus(afChangeListener);
     }
 }
