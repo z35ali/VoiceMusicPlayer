@@ -398,11 +398,8 @@ public class SmartPlayerActivity extends AppCompatActivity {
                 }).check();
     }
     private void validateReceiveStart() {
-
         // Stops the current media player
         if (mediaPlayer != null) {
-            mediaPlayer.stop();
-            mediaPlayer.reset();
             mediaPlayer.release();
         }
 
@@ -447,7 +444,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
         // Set seek bar to end at song ending
         seekBar.setMax(mediaPlayer.getDuration());
 
-        playPause();
+        
         if(res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             mediaPlayer.start();
             playing = true;
@@ -708,6 +705,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
         startActivityIfNeeded(intent, 0);
 
 
+
     }
 
     @Override
@@ -717,5 +715,6 @@ public class SmartPlayerActivity extends AppCompatActivity {
         NotificationManager nMgr = (NotificationManager) getSystemService(ns);
         nMgr.cancel(0);
         audioManager.abandonAudioFocus(afChangeListener);
+
     }
 }
