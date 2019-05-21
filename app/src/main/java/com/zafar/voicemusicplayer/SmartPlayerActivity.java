@@ -81,6 +81,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private boolean playing = false;
     private boolean loop;
     Bitmap bitmap;
+    Context context;
 
 
     Handler handler;
@@ -101,7 +102,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_smart_player);
 
-
+        context = getApplicationContext();
         // Declare layouts
         parentRelativeLayout = findViewById(R.id.parentRelativeLayout);
         pausePlayBtn = findViewById(R.id.pause_play_btn);
@@ -328,10 +329,31 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
        NotificationCompat.Builder mBuilder =
                new NotificationCompat.Builder(getApplicationContext(), "notify_001");
-       Intent intent = new Intent(this, SmartPlayerActivity.class);
-       intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-       PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+       //This is the intent of PendingIntent
+       Intent intentActionPrev = new Intent(context,ActionReceiver.class);
+
+       //This is optional if you have more than one buttons and want to differentiate between two
+       intentActionPrev.putExtra("action","actionPrev");
+
+      PendingIntent pendingIntentPrev = PendingIntent.getBroadcast(context,1,intentActionPrev,PendingIntent.FLAG_UPDATE_CURRENT);
+
+
+       //This is the intent of PendingIntent
+       Intent intentActionPP = new Intent(context,ActionReceiver.class);
+
+       //This is optional if you have more than one buttons and want to differentiate between two
+       intentActionPP.putExtra("action","actionPP");
+
+       PendingIntent pendingIntentPP = PendingIntent.getBroadcast(context,2,intentActionPP,PendingIntent.FLAG_UPDATE_CURRENT);
+
+       //This is the intent of PendingIntent
+       Intent intentActionNext = new Intent(context,ActionReceiver.class);
+
+       //This is optional if you have more than one buttons and want to differentiate between two
+       intentActionNext.putExtra("action","actionNext");
+
+       PendingIntent pendingIntentNext = PendingIntent.getBroadcast(context,3,intentActionNext,PendingIntent.FLAG_UPDATE_CURRENT);
 
         String contextText = "";
        if (playing) {
@@ -350,9 +372,9 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
 
 
-       NotificationCompat.Action previous = new NotificationCompat.Action.Builder(R.drawable.previous, "previous", pendingIntent).build();
-       NotificationCompat.Action pause = new NotificationCompat.Action.Builder(R.drawable.pause, "pause", pendingIntent).build();
-       NotificationCompat.Action next = new NotificationCompat.Action.Builder(R.drawable.next, "next", pendingIntent).build();
+       NotificationCompat.Action previous = new NotificationCompat.Action.Builder(R.drawable.previous, "previous", pendingIntentPrev).build();
+       NotificationCompat.Action pause = new NotificationCompat.Action.Builder(R.drawable.pause, "pause", pendingIntentPP).build();
+       NotificationCompat.Action next = new NotificationCompat.Action.Builder(R.drawable.next, "next", pendingIntentNext).build();
 
 
        mBuilder.addAction(previous);
