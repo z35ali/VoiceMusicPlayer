@@ -80,7 +80,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private  static String title;
     private boolean playing = false;
     private boolean loop;
-
+    Bitmap bitmap;
 
 
     Handler handler;
@@ -333,32 +333,46 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
 
-       NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
-
+        String contextText = "";
        if (playing) {
-           bigText.setBigContentTitle(title + " is playing!");
+         contextText = title + " is playing!";
        }else{
-           bigText.setBigContentTitle(title + " is paused!");
+           contextText = title + " is paused!";
        }
 
-       mBuilder.setContentIntent(pendingIntent);
-       mBuilder.setSmallIcon(R.mipmap.ic_launcher_round);
-       mBuilder.setContentText("Tap to go back to player");
-       mBuilder.setStyle(bigText);
+       mBuilder.setSmallIcon(R.mipmap.ic_launcher_round)
+               .setContentTitle(title)
+               .setContentText(contextText)
+               .setLargeIcon(bitmap)
+               .setColor(Color.BLACK)
+               .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle().setShowActionsInCompactView(0,1,2));
+
+
+
+
+       NotificationCompat.Action previous = new NotificationCompat.Action.Builder(R.drawable.previous, "previous", pendingIntent).build();
+       NotificationCompat.Action pause = new NotificationCompat.Action.Builder(R.drawable.pause, "pause", pendingIntent).build();
+       NotificationCompat.Action next = new NotificationCompat.Action.Builder(R.drawable.next, "next", pendingIntent).build();
+
+
+       mBuilder.addAction(previous);
+       mBuilder.addAction(pause);
+       mBuilder.addAction(next);
+
 
        mNotificationManager =
                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
 
 
-           String channelId = "Your_channel_id";
-           NotificationChannel channel = new NotificationChannel(channelId,
-                   "Channel readable title", NotificationManager.IMPORTANCE_DEFAULT);
-           channel.enableVibration(false);
-           channel.setSound(null, null);
-           mBuilder.setOngoing(true);
-           mNotificationManager.createNotificationChannel(channel);
-           mBuilder.setChannelId(channelId);
+       String channelId = "Your_channel_id";
+       NotificationChannel channel = new NotificationChannel(channelId,
+               "Channel readable title", NotificationManager.IMPORTANCE_DEFAULT);
+       channel.enableVibration(false);
+       channel.setSound(null, null);
+       mBuilder.setOngoing(true);
+       mNotificationManager.createNotificationChannel(channel);
+       mBuilder.setChannelId(channelId);
 
 
 
@@ -424,7 +438,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
         getTrackInfo(songs.get(position).toString(), songName);
 
         if (!(data == null)) {
-            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+             bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
             imageView.setImageBitmap(bitmap);
         }else{
             imageView.setImageResource(R.drawable.music);
@@ -607,7 +621,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
         getTrackInfo(songs.get(position).toString(), songName);
 
         if (!(data == null)) {
-            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+             bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
             imageView.setImageBitmap(bitmap);
         }else{
             imageView.setImageResource(R.drawable.music);
