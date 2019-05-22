@@ -65,7 +65,8 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private Intent speechRecognizerIntent;
     private String keeper = "";
 
-    private ImageView pausePlayBtn, nextBtn, previousBtn, loopBtn;
+    public static ImageView pausePlayBtn;
+    private ImageView nextBtn, previousBtn, loopBtn;
     private TextView songNameText, startTime, endTime;
     private ImageView imageView;
     private RelativeLayout lowerLayout;
@@ -77,10 +78,17 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private int position;
     private ArrayList < File > songs;
     private static String songName;
-    private  static String title;
-    private boolean playing = false;
+    private  static String title, artist;
+    public static boolean playing = false;
     private boolean loop;
     Bitmap bitmap;
+    Context context;
+
+
+    public static boolean intentSent, next, previous = false;
+
+
+
 
 
     Handler handler;
@@ -93,6 +101,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
     AudioManager.OnAudioFocusChangeListener afChangeListener;
     int res;
 
+    Bitmap icon ;
 
 
 
@@ -101,7 +110,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_smart_player);
 
-
+        context = getApplicationContext();
         // Declare layouts
         parentRelativeLayout = findViewById(R.id.parentRelativeLayout);
         pausePlayBtn = findViewById(R.id.pause_play_btn);
@@ -125,10 +134,10 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
                 handler = new Handler();
 
-
           audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
 
-
+          icon = BitmapFactory.decodeResource(context.getResources(),
+                R.drawable.music);
 
         res = audioManager.requestAudioFocus(afChangeListener, AudioManager.STREAM_MUSIC, // Music streaming
                 AudioManager.AUDIOFOCUS_GAIN_TRANSIENT); // Permanent focus
@@ -302,7 +311,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
                         } else if (focusChange == AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
                             // Lower the volume, keep playing
                             mediaPlayer.setVolume(0.2f, 0.2f);
-                        } else if (focusChange == audioManager.AUDIOFOCUS_GAIN) {
+                        } else if (focusChange == audioManager.AUDIOFOCUS_GAIN_TRANSIENT) {
                             // Your app has been granted audio focus again
                             // Raise volume to normal, restart playback if necessary
                            play();
@@ -328,35 +337,74 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
        NotificationCompat.Builder mBuilder =
                new NotificationCompat.Builder(getApplicationContext(), "notify_001");
-       Intent intent = new Intent(this, SmartPlayerActivity.class);
-       intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-       PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+       //This is the intent of PendingIntent
+       Intent intentActionPrev = new Intent(context,ActionReceiver.class);
+       intentActionPrev.putExtra("song", songs);
+       intentActionPrev.putExtra("songName", songName);
+       intentActionPrev.putExtra("position", position);
+       //This is optional if you have more than one buttons and want to differentiate between two
+       intentActionPrev.putExtra("action","actionPrev");
 
-        String contextText = "";
-       if (playing) {
-         contextText = title + " is playing!";
-       }else{
-           contextText = title + " is paused!";
-       }
+      PendingIntent pendingIntentPrev = PendingIntent.getBroadcast(context,1,intentActionPrev,PendingIntent.FLAG_UPDATE_CURRENT);
 
-       mBuilder.setSmallIcon(R.mipmap.ic_launcher_round)
+
+       //This is the intent of PendingIntent
+       Intent intentActionPP = new Intent(context,ActionReceiver.class);
+
+       //This is optional if you have more than one buttons and want to differentiate between two
+       intentActionPP.putExtra("action","actionPP");
+
+       PendingIntent pendingIntentPP = PendingIntent.getBroadcast(context,2,intentActionPP,PendingIntent.FLAG_UPDATE_CURRENT);
+
+       //This is the intent of PendingIntent
+       Intent intentActionNext = new Intent(context,ActionReceiver.class);
+       intentActionNext.putExtra("song", songs);
+       intentActionNext.putExtra("songName", songName);
+       intentActionNext.putExtra("position", position);
+       //This is optional if you have more than one buttons and want to differentiate between two
+       intentActionNext.putExtra("action","actionNext");
+
+       PendingIntent pendingIntentNext = PendingIntent.getBroadcast(context,3,intentActionNext,PendingIntent.FLAG_UPDATE_CURRENT);
+
+
+
+
+       mBuilder.setSmallIcon(R.drawable.music)
                .setContentTitle(title)
-               .setContentText(contextText)
-               .setLargeIcon(bitmap)
+               .setContentText(artist)
                .setColor(Color.BLACK)
                .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle().setShowActionsInCompactView(0,1,2));
 
+        if (mediaPlayer != null){
+            if (artist != null){
+            mBuilder.setContentText(artist + "    " + getTimeString(mediaPlayer.getCurrentPosition()) +" / " + getTimeString(mediaPlayer.getDuration()));
+        }else {
+                mBuilder.setContentText(getTimeString(mediaPlayer.getCurrentPosition()) +" / " + getTimeString(mediaPlayer.getDuration()));
+
+            }
+            }
+
+        if (bitmap != null){
+            mBuilder.setLargeIcon(bitmap);
+        }
 
 
+       NotificationCompat.Action previous = new NotificationCompat.Action.Builder(R.drawable.previous, "previous", pendingIntentPrev).build();
 
-       NotificationCompat.Action previous = new NotificationCompat.Action.Builder(R.drawable.previous, "previous", pendingIntent).build();
-       NotificationCompat.Action pause = new NotificationCompat.Action.Builder(R.drawable.pause, "pause", pendingIntent).build();
-       NotificationCompat.Action next = new NotificationCompat.Action.Builder(R.drawable.next, "next", pendingIntent).build();
+
+       NotificationCompat.Action next = new NotificationCompat.Action.Builder(R.drawable.next, "next", pendingIntentNext).build();
 
 
        mBuilder.addAction(previous);
-       mBuilder.addAction(pause);
+       if (playing) {
+           NotificationCompat.Action pause = new NotificationCompat.Action.Builder(R.drawable.pause, "pause", pendingIntentPP).build();
+           mBuilder.addAction(pause);
+       }else{
+           NotificationCompat.Action play = new NotificationCompat.Action.Builder(R.drawable.play, "play", pendingIntentPP).build();
+           mBuilder.addAction(play);
+
+       }
        mBuilder.addAction(next);
 
 
@@ -439,16 +487,19 @@ public class SmartPlayerActivity extends AppCompatActivity {
             imageView.setImageBitmap(bitmap);
         }else{
             imageView.setImageResource(R.drawable.music);
+            bitmap = icon;
         }
 
         // Set seek bar to end at song ending
         seekBar.setMax(mediaPlayer.getDuration());
 
-        
+
         if(res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            res = audioManager.requestAudioFocus(afChangeListener, AudioManager.STREAM_MUSIC, AUDIOFOCUS_GAIN);
             mediaPlayer.start();
             playing = true;
         }
+
 
 
         showNotification();
@@ -485,7 +536,34 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        intent = getIntent();
+            if (intentSent) {
+                intentSent = false;
+                playPause();
+                playCycle();
+            }
+            if (next){
+                next();
+                next = false;
+
+                }
+
+            if (previous){
+                previous();
+                previous = false;
+
+            }
+
+
+        super.onNewIntent(intent);
+
+    }
+
     private void playCycle() {
+
+
 
         // Move Seek Bar progress as well as start and end times on each playCycle() call
         seekBar.setProgress(mediaPlayer.getCurrentPosition());
@@ -517,24 +595,24 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private void playPause() {
 
         if (mediaPlayer.isPlaying()) {
-            pausePlayBtn.setImageResource(R.drawable.play);
+
 
             res = audioManager.requestAudioFocus(afChangeListener, AudioManager.STREAM_MUSIC, AUDIOFOCUS_LOSS_TRANSIENT);
             mediaPlayer.pause();
-
+            pausePlayBtn.setImageResource(R.drawable.play);
 
             playing = false;
 
 
         } else {
-            pausePlayBtn.setImageResource(R.drawable.pause);
+
 
             res = audioManager.requestAudioFocus(afChangeListener, AudioManager.STREAM_MUSIC, AUDIOFOCUS_GAIN);
+            pausePlayBtn.setImageResource(R.drawable.pause);
 
             mediaPlayer.start();
             playing = true;
         }
-        showNotification();
 
         playCycle();
 
@@ -622,6 +700,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
             imageView.setImageBitmap(bitmap);
         }else{
             imageView.setImageResource(R.drawable.music);
+            bitmap = icon;
         }
 
         playPause();
@@ -675,7 +754,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private void getTrackInfo(String path, String fileName) {
         MediaMetadataRetriever metaRetriever= new MediaMetadataRetriever();
         metaRetriever.setDataSource(path);
-        String artist = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+        artist = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
          title = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
         String album = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
         if (artist == null || title == null || album == null) {
@@ -703,8 +782,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
         moveTaskToBack(true);
         Intent intent = new Intent(this, MainActivity.class);
         startActivityIfNeeded(intent, 0);
-
-
+        audioManager.abandonAudioFocus(afChangeListener);
 
     }
 
@@ -714,7 +792,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
         String ns = Context.NOTIFICATION_SERVICE;
         NotificationManager nMgr = (NotificationManager) getSystemService(ns);
         nMgr.cancel(0);
-        audioManager.abandonAudioFocus(afChangeListener);
+
 
     }
 }
