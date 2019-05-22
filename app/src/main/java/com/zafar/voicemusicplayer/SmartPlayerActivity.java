@@ -78,11 +78,12 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private int position;
     private ArrayList < File > songs;
     private static String songName;
-    private  static String title;
+    private  static String title, artist;
     public static boolean playing = false;
     private boolean loop;
     Bitmap bitmap;
     Context context;
+
 
     public static boolean intentSent, next, previous = false;
 
@@ -100,6 +101,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
     AudioManager.OnAudioFocusChangeListener afChangeListener;
     int res;
 
+    Bitmap icon ;
 
 
 
@@ -134,7 +136,8 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
           audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
 
-
+          icon = BitmapFactory.decodeResource(context.getResources(),
+                R.drawable.music);
 
         res = audioManager.requestAudioFocus(afChangeListener, AudioManager.STREAM_MUSIC, // Music streaming
                 AudioManager.AUDIOFOCUS_GAIN_TRANSIENT); // Permanent focus
@@ -364,23 +367,27 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
        PendingIntent pendingIntentNext = PendingIntent.getBroadcast(context,3,intentActionNext,PendingIntent.FLAG_UPDATE_CURRENT);
 
-        String contextText = "";
-       if (playing) {
-         contextText = title + " is playing!";
 
 
-       }else{
-           contextText = title + " is paused!";
-       }
 
-       mBuilder.setSmallIcon(R.mipmap.ic_launcher_round)
+       mBuilder.setSmallIcon(R.drawable.music)
                .setContentTitle(title)
-               .setContentText(contextText)
-               .setLargeIcon(bitmap)
+               .setContentText(artist)
                .setColor(Color.BLACK)
                .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle().setShowActionsInCompactView(0,1,2));
 
+        if (mediaPlayer != null){
+            if (artist != null){
+            mBuilder.setContentText(artist + "    " + getTimeString(mediaPlayer.getCurrentPosition()) +" / " + getTimeString(mediaPlayer.getDuration()));
+        }else {
+                mBuilder.setContentText(getTimeString(mediaPlayer.getCurrentPosition()) +" / " + getTimeString(mediaPlayer.getDuration()));
 
+            }
+            }
+
+        if (bitmap != null){
+            mBuilder.setLargeIcon(bitmap);
+        }
 
 
        NotificationCompat.Action previous = new NotificationCompat.Action.Builder(R.drawable.previous, "previous", pendingIntentPrev).build();
@@ -480,7 +487,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
             imageView.setImageBitmap(bitmap);
         }else{
             imageView.setImageResource(R.drawable.music);
-            bitmap = null;
+            bitmap = icon;
         }
 
         // Set seek bar to end at song ending
@@ -693,7 +700,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
             imageView.setImageBitmap(bitmap);
         }else{
             imageView.setImageResource(R.drawable.music);
-            bitmap = null;
+            bitmap = icon;
         }
 
         playPause();
@@ -747,7 +754,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private void getTrackInfo(String path, String fileName) {
         MediaMetadataRetriever metaRetriever= new MediaMetadataRetriever();
         metaRetriever.setDataSource(path);
-        String artist = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+        artist = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
          title = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
         String album = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
         if (artist == null || title == null || album == null) {
