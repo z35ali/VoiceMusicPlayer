@@ -23,7 +23,7 @@ public class ActionReceiver extends BroadcastReceiver {
         else if(action.equals("actionPP")){
             Toast.makeText(context, "Pause/Play", Toast.LENGTH_SHORT).show();
             Intent openPlayerActivity= new Intent(context, SmartPlayerActivity.class);
-            openPlayerActivity.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
+            openPlayerActivity.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK );
 
 
             SmartPlayerActivity.intentSent = true;

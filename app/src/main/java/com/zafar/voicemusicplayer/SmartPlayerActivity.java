@@ -24,6 +24,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -74,7 +76,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
     Context context;
     NotificationCompat.Builder mBuilder;
     NotificationManager mNotificationManager;
-
+    Animation animation;
 
     public static boolean intentSent, next, previous = false;
 
@@ -279,13 +281,24 @@ public class SmartPlayerActivity extends AppCompatActivity {
         loopBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (loop) {
-                    loopBtn.setColorFilter(Color.BLACK);
-                    loop = false;
-                } else{
-                    loopBtn.setColorFilter(Color.RED);
-                    loop = true;
-                }
+                loop = !loop;
+              if(loop){
+                  loopBtn.setImageResource(R.drawable.loop);
+                  loopBtn.setColorFilter(Color.RED);
+
+              }else{
+                  loopBtn.setImageResource(R.drawable.notlooping);
+                  loopBtn.setColorFilter(Color.BLACK);
+
+
+
+              }
+
+
+
+
+
+
             }
         });
 
@@ -326,15 +339,14 @@ public class SmartPlayerActivity extends AppCompatActivity {
    private void showNotification() {
      
 
-       mBuilder =
-               new NotificationCompat.Builder(getApplicationContext(), "notify_001");
+       mBuilder = new NotificationCompat.Builder(getApplicationContext(), "notify_001");
 
        //This is the intent of PendingIntent
        Intent intentActionPrev = new Intent(context,ActionReceiver.class);
        intentActionPrev.putExtra("song", songs);
        intentActionPrev.putExtra("songName", songName);
        intentActionPrev.putExtra("position", position);
-       //This is optional if you have more than one buttons and want to differentiate between two
+
        intentActionPrev.putExtra("action","actionPrev");
 
       PendingIntent pendingIntentPrev = PendingIntent.getBroadcast(context,1,intentActionPrev,PendingIntent.FLAG_UPDATE_CURRENT);
@@ -343,7 +355,6 @@ public class SmartPlayerActivity extends AppCompatActivity {
        //This is the intent of PendingIntent
        Intent intentActionPP = new Intent(context,ActionReceiver.class);
 
-       //This is optional if you have more than one buttons and want to differentiate between two
        intentActionPP.putExtra("action","actionPP");
 
        PendingIntent pendingIntentPP = PendingIntent.getBroadcast(context,2,intentActionPP,PendingIntent.FLAG_UPDATE_CURRENT);
@@ -353,17 +364,16 @@ public class SmartPlayerActivity extends AppCompatActivity {
        intentActionNext.putExtra("song", songs);
        intentActionNext.putExtra("songName", songName);
        intentActionNext.putExtra("position", position);
-       //This is optional if you have more than one buttons and want to differentiate between two
+
        intentActionNext.putExtra("action","actionNext");
 
        PendingIntent pendingIntentNext = PendingIntent.getBroadcast(context,3,intentActionNext,PendingIntent.FLAG_UPDATE_CURRENT);
 
 
-
-
        mBuilder.setSmallIcon(R.drawable.music)
                .setContentTitle(title)
                .setContentText(artist)
+               .setSubText("Opens App")
                .setColor(Color.BLACK)
                .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle().setShowActionsInCompactView(0,1,2));
 
@@ -387,7 +397,10 @@ public class SmartPlayerActivity extends AppCompatActivity {
                 mBuilder.addAction(play);
 
             }
-            mBuilder.addAction(next);
+       mBuilder.addAction(next);
+
+
+
 
 
        mNotificationManager =
@@ -518,7 +531,6 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
     @Override
     protected void onNewIntent(Intent intent) {
-        intent = getIntent();
             if (intentSent) {
                 intentSent = false;
                 playPause();
@@ -537,7 +549,6 @@ public class SmartPlayerActivity extends AppCompatActivity {
             }
 
 
-        super.onNewIntent(intent);
 
     }
 
@@ -770,11 +781,19 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        moveTaskToBack(true);
         Intent intent = new Intent(this, MainActivity.class);
         startActivityIfNeeded(intent, 0);
         audioManager.abandonAudioFocus(afChangeListener);
+        String ns = Context.NOTIFICATION_SERVICE;
+        NotificationManager nMgr = (NotificationManager) getSystemService(ns);
+        nMgr.cancel(0);
 
+    }
+
+    @Override
+    protected void onResume() {
+        showNotification();
+        super.onResume();
     }
 
     @Override
@@ -783,7 +802,5 @@ public class SmartPlayerActivity extends AppCompatActivity {
         String ns = Context.NOTIFICATION_SERVICE;
         NotificationManager nMgr = (NotificationManager) getSystemService(ns);
         nMgr.cancel(0);
-
-
     }
 }
