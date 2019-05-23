@@ -76,10 +76,9 @@
             android:id="@+id/loop_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/loop"
             android:layout_toEndOf="@+id/next_btn"
-            android:paddingTop="5dp"
-            />
+            android:paddingTop="6dp"
+            android:src="@drawable/notlooping" />
 
 
 

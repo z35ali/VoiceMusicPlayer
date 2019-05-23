@@ -5,10 +5,8 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -16,19 +14,13 @@ import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
-import android.provider.MediaStore;
-import android.provider.Settings;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.telephony.PhoneStateListener;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -40,7 +32,6 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
@@ -80,13 +71,16 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private static String songName;
     private  static String title, artist;
     public static boolean playing = false;
-    private boolean loop;
+    private boolean loop, actionsAlreadyAdded;
     Bitmap bitmap;
     Context context;
-
+    NotificationCompat.Builder mBuilder;
+    NotificationManager mNotificationManager;
+    Animation animation;
 
     public static boolean intentSent, next, previous = false;
 
+    int id = 0;
 
 
 
@@ -129,7 +123,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
         lowerLayout.setVisibility(View.VISIBLE);
         voiceMode = false;
         loop = false;
-
+        actionsAlreadyAdded = false;
 
 
                 handler = new Handler();
@@ -287,13 +281,24 @@ public class SmartPlayerActivity extends AppCompatActivity {
         loopBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (loop) {
-                    loopBtn.setColorFilter(Color.BLACK);
-                    loop = false;
-                } else{
-                    loopBtn.setColorFilter(Color.RED);
-                    loop = true;
-                }
+                loop = !loop;
+              if(loop){
+                  loopBtn.setImageResource(R.drawable.loop);
+                  loopBtn.setColorFilter(Color.RED);
+
+              }else{
+                  loopBtn.setImageResource(R.drawable.notlooping);
+                  loopBtn.setColorFilter(Color.BLACK);
+
+
+
+              }
+
+
+
+
+
+
             }
         });
 
@@ -321,7 +326,6 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
         checkRecordPermission();
 
-        showNotification();
 
 
     }
@@ -333,17 +337,16 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
 
    private void showNotification() {
-      NotificationManager mNotificationManager;
+     
 
-       NotificationCompat.Builder mBuilder =
-               new NotificationCompat.Builder(getApplicationContext(), "notify_001");
+       mBuilder = new NotificationCompat.Builder(getApplicationContext(), "notify_001");
 
        //This is the intent of PendingIntent
        Intent intentActionPrev = new Intent(context,ActionReceiver.class);
        intentActionPrev.putExtra("song", songs);
        intentActionPrev.putExtra("songName", songName);
        intentActionPrev.putExtra("position", position);
-       //This is optional if you have more than one buttons and want to differentiate between two
+
        intentActionPrev.putExtra("action","actionPrev");
 
       PendingIntent pendingIntentPrev = PendingIntent.getBroadcast(context,1,intentActionPrev,PendingIntent.FLAG_UPDATE_CURRENT);
@@ -352,7 +355,6 @@ public class SmartPlayerActivity extends AppCompatActivity {
        //This is the intent of PendingIntent
        Intent intentActionPP = new Intent(context,ActionReceiver.class);
 
-       //This is optional if you have more than one buttons and want to differentiate between two
        intentActionPP.putExtra("action","actionPP");
 
        PendingIntent pendingIntentPP = PendingIntent.getBroadcast(context,2,intentActionPP,PendingIntent.FLAG_UPDATE_CURRENT);
@@ -362,50 +364,43 @@ public class SmartPlayerActivity extends AppCompatActivity {
        intentActionNext.putExtra("song", songs);
        intentActionNext.putExtra("songName", songName);
        intentActionNext.putExtra("position", position);
-       //This is optional if you have more than one buttons and want to differentiate between two
+
        intentActionNext.putExtra("action","actionNext");
 
        PendingIntent pendingIntentNext = PendingIntent.getBroadcast(context,3,intentActionNext,PendingIntent.FLAG_UPDATE_CURRENT);
 
 
-
-
        mBuilder.setSmallIcon(R.drawable.music)
                .setContentTitle(title)
                .setContentText(artist)
+               .setSubText("Opens App")
                .setColor(Color.BLACK)
                .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle().setShowActionsInCompactView(0,1,2));
 
-        if (mediaPlayer != null){
-            if (artist != null){
-            mBuilder.setContentText(artist + "    " + getTimeString(mediaPlayer.getCurrentPosition()) +" / " + getTimeString(mediaPlayer.getDuration()));
-        }else {
-                mBuilder.setContentText(getTimeString(mediaPlayer.getCurrentPosition()) +" / " + getTimeString(mediaPlayer.getDuration()));
 
-            }
-            }
 
         if (bitmap != null){
             mBuilder.setLargeIcon(bitmap);
         }
 
 
-       NotificationCompat.Action previous = new NotificationCompat.Action.Builder(R.drawable.previous, "previous", pendingIntentPrev).build();
+            NotificationCompat.Action previous = new NotificationCompat.Action.Builder(R.drawable.previous, "previous", pendingIntentPrev).build();
 
+            NotificationCompat.Action next = new NotificationCompat.Action.Builder(R.drawable.next, "next", pendingIntentNext).build();
 
-       NotificationCompat.Action next = new NotificationCompat.Action.Builder(R.drawable.next, "next", pendingIntentNext).build();
+            mBuilder.addAction(previous);
+            if (playing) {
+                NotificationCompat.Action pause = new NotificationCompat.Action.Builder(R.drawable.pause, "pause", pendingIntentPP).build();
+                mBuilder.addAction(pause);
+            } else {
+                NotificationCompat.Action play = new NotificationCompat.Action.Builder(R.drawable.play, "play", pendingIntentPP).build();
+                mBuilder.addAction(play);
 
-
-       mBuilder.addAction(previous);
-       if (playing) {
-           NotificationCompat.Action pause = new NotificationCompat.Action.Builder(R.drawable.pause, "pause", pendingIntentPP).build();
-           mBuilder.addAction(pause);
-       }else{
-           NotificationCompat.Action play = new NotificationCompat.Action.Builder(R.drawable.play, "play", pendingIntentPP).build();
-           mBuilder.addAction(play);
-
-       }
+            }
        mBuilder.addAction(next);
+
+
+
 
 
        mNotificationManager =
@@ -424,7 +419,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
 
 
-       mNotificationManager.notify(0, mBuilder.build());
+       mNotificationManager.notify(id, mBuilder.build());
    }
 
     public void checkRecordPermission(){
@@ -500,8 +495,6 @@ public class SmartPlayerActivity extends AppCompatActivity {
             playing = true;
         }
 
-
-
         showNotification();
 
 
@@ -538,7 +531,6 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
     @Override
     protected void onNewIntent(Intent intent) {
-        intent = getIntent();
             if (intentSent) {
                 intentSent = false;
                 playPause();
@@ -557,7 +549,6 @@ public class SmartPlayerActivity extends AppCompatActivity {
             }
 
 
-        super.onNewIntent(intent);
 
     }
 
@@ -570,8 +561,6 @@ public class SmartPlayerActivity extends AppCompatActivity {
         startTime.setText(getTimeString(mediaPlayer.getCurrentPosition()));
         endTime.setText(getTimeString(mediaPlayer.getDuration()));
 
-        // Handles accidental notification close
-        showNotification();
 
 
         if (mediaPlayer.isPlaying()) {
@@ -614,6 +603,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
             playing = true;
         }
 
+        showNotification();
         playCycle();
 
     }
@@ -709,7 +699,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
         seekBar.setMax(mediaPlayer.getDuration());
         mediaPlayer.start();
 
-
+        changeNotification();
         playCycle();
 
 
@@ -768,6 +758,18 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
 
     }
+    
+    public void changeNotification(){
+        mBuilder.setContentTitle(title)
+                .setContentText(artist);
+
+        if (bitmap != null){
+            mBuilder.setLargeIcon(bitmap);
+        }
+        Notification notification = mBuilder.getNotification();
+        notification.flags = Notification.FLAG_ONGOING_EVENT;
+        mNotificationManager.notify(id, mBuilder.build());
+    }
 
     public static String getCurrentSong(){
         return songName;
@@ -779,11 +781,19 @@ public class SmartPlayerActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        moveTaskToBack(true);
         Intent intent = new Intent(this, MainActivity.class);
         startActivityIfNeeded(intent, 0);
         audioManager.abandonAudioFocus(afChangeListener);
+        String ns = Context.NOTIFICATION_SERVICE;
+        NotificationManager nMgr = (NotificationManager) getSystemService(ns);
+        nMgr.cancel(0);
 
+    }
+
+    @Override
+    protected void onResume() {
+        showNotification();
+        super.onResume();
     }
 
     @Override
@@ -792,7 +802,5 @@ public class SmartPlayerActivity extends AppCompatActivity {
         String ns = Context.NOTIFICATION_SERVICE;
         NotificationManager nMgr = (NotificationManager) getSystemService(ns);
         nMgr.cancel(0);
-
-
     }
 }
